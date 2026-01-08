@@ -1,0 +1,110 @@
+import PocketBase from 'pocketbase';
+import { PUBLIC_PB_URL } from '$env/static/public'; 
+
+// console.log("📡 연결하려는 PB 주소:", PUBLIC_PB_URL);
+export const pb = new PocketBase(PUBLIC_PB_URL)
+
+
+// 음악 앱 전역 상태
+export let musicState = $state({
+    allMusics: [],      // 서버에서 가져온 전체 음악 목록
+    favoriteIds: new Set(), // 사용자가 '좋아요' 한 음악 ID들
+    isLoading: false
+});
+
+
+
+
+export const musicActions = {
+    // ... 기존 init, toggleFavorite 함수들
+
+    async init() {
+        try {
+            // PocketBase에서 musics 컬렉션의 모든 데이터를 가져옴 (생성일 역순)
+            const records = await pb.collection('musics').getFullList({
+                sort: '-created',
+            });
+            
+            // 가져온 데이터를 상태에 저장
+            musicState.allMusics = records; 
+            console.log("🎵 데이터 로드 완료:", records.length, "개의 곡");
+            console.log(musicState.allMusics)
+        } catch (err) {
+            console.error("❌ 데이터 불러오기 실패:", err);
+        }
+    },
+
+    // 1. 새로운 음악 추가 (Create)
+    async createMusic(newMusicData) {
+        try {
+            // PocketBase에 저장
+            const record = await pb.collection('musics').create(newMusicData);
+            
+            // 로컬 상태(UI)에 즉시 반영
+            musicState.allMusics = [...musicState.allMusics, record];
+            
+            console.log("✅ 새 음악이 추가되었습니다:", record.title);
+            return record;
+        } catch (err) {
+            console.error("❌ 음악 추가 실패:", err);
+            throw err;
+        }
+    },
+
+    // 2. 기존 음악 정보 수정 (Update)
+    async updateMusic(id, updatedData) {
+        try {
+            // PocketBase 업데이트
+            const record = await pb.collection('musics').update(id, updatedData);
+            
+            // 로컬 상태 업데이트 (수정된 데이터만 교체)
+            musicState.allMusics = musicState.allMusics.map(m => 
+                m.id === id ? record : m
+            );
+            
+            console.log("✅ 음악 정보가 수정되었습니다:", record.title);
+            return record;
+        } catch (err) {
+            console.error("❌ 음악 수정 실패:", err);
+            throw err;
+        }
+    },
+
+    // 3. 음악 삭제 (Delete)
+    async deleteMusic(id) {
+        if (!confirm("정말로 이 음악을 삭제하시겠습니까?")) return;
+
+        try {
+            // PocketBase에서 삭제
+            await pb.collection('musics').delete(id);
+            
+            // 로컬 상태에서 삭제 (UI 즉시 반영)
+            musicState.allMusics = musicState.allMusics.filter(m => m.id !== id);
+            
+            // 만약 현재 재생 중인 곡이 삭제된 곡이라면 첫 번째 곡으로 변경
+            // (selectedMusic은 컴포넌트 레벨에서 관리하므로 컴포넌트 로직에서 처리 권장)
+            
+            console.log("✅ 음악이 삭제되었습니다. ID:", id);
+        } catch (err) {
+            console.error("❌ 음악 삭제 실패:", err);
+            throw err;
+        }
+    },
+	async incrementView(musicId) {
+		try {
+			// 유저에게 알리지 않고 백그라운드에서 실행
+			const record = await pb.collection('musics').update(musicId, {
+				'viewed+': 1  // 기존 값에서 1을 더해주는 PocketBase 문법
+			});
+			
+			// 로컬 상태(musicState)만 살짝 업데이트해서 우측 통계에 즉시 반영
+			const index = musicState.allMusics.findIndex(m => m.id === musicId);
+			if (index !== -1) {
+				musicState.allMusics[index].viewed = record.viewed;
+			}
+		} catch (err) {
+			// 사용자에게 경고창을 띄우지 않고 콘솔에만 기록 (사용자 경험 방해 금지)
+			console.error("Silent view increment failed:", err);
+		}
+	}
+};
