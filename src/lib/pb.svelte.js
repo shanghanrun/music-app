@@ -90,6 +90,24 @@ export const musicActions = {
             throw err;
         }
     },
+    async deleteMultiple(ids){
+        try {
+            // PocketBase에서 삭제
+            for (const id of ids){
+                await pb.collection('musics').delete(id);
+            }
+            // 로컬 상태에서 삭제 (UI 즉시 반영)
+            musicState.allMusics = musicState.allMusics.filter(m => m.id !== id);
+            
+            // 만약 현재 재생 중인 곡이 삭제된 곡이라면 첫 번째 곡으로 변경
+            // (selectedMusic은 컴포넌트 레벨에서 관리하므로 컴포넌트 로직에서 처리 권장)
+            
+            console.log(`✅ ${ids.length}개 음악이 삭제되었습니다.`);
+        } catch (err) {
+            console.error("❌ 음악 삭제 실패:", err);
+            throw err;
+        }
+    },
 	async incrementView(musicId) {
 		try {
 			// 유저에게 알리지 않고 백그라운드에서 실행

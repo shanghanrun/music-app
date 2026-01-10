@@ -1,13 +1,17 @@
 <script>
-    let { item, isActive, isPlaying, handlePlay } = $props();
+    import { musicUI } from "../store/musicUI.svelte";
+    let { item } = $props();
 
-    // 이미지 경로 로직
-    const imgUrl = $derived(item.thumbUrl);
+	// 현재 카드의 곡이 선택된 곡인지 확인
+    // musicUI 내부 메서드를 사용하여 현재 활성화된 카드인지 판단
+    const isCurrent = $derived(musicUI.isCurrent(item.id));
+	 // id 비교가 객체 비교보다 '불변성' 측면에서 훨씬 안전합니다.
+	
 </script>
 
-<button class="music-card-item" class:active={isActive} onclick={()=>handlePlay(item)}>
+<button class="music-card-item" class:active={isCurrent} onclick={()=>musicUI.selectMusic(item)}>
     <div class="img-wrapper">
-        <img src={imgUrl} alt={item.title} />
+        <img src={item.thumbUrl} alt={item.title} />
     </div>
 
     <div class="card-body">
@@ -15,8 +19,13 @@
         <div class="meta">{item .genre} · 👁️ {item .viewed || 0}</div>
     </div>
 
-    <div class="play-control-btn">
-        {#if isActive && isPlaying}
+    <div class="play-control-btn" 
+        onclick={(e) => {
+            e.stopPropagation(); // 카드 전체 클릭 이벤트가 발생하지 않도록 막음
+            musicUI.handlePlay(item);
+        }}
+    >
+        {#if isCurrent && musicUI.isPlaying}
             <span class="icon">⏸️</span>
         {:else}
             <span class="icon">▶️</span>
