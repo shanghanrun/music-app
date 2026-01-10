@@ -11,6 +11,8 @@
  
   import RelatedMusicListView from "../component/RelatedMusicListView.svelte";
   import RelatedMusicCard from "../component/RelatedMusicCard.svelte";
+  import MusicInfo from "../component/MusicInfo.svelte";
+  import MusicTextInfo from "../component/MusicTextInfo.svelte";
 
 	// 1. 페이지가 열리면 서버에서 데이터를 싹 긁어와서 musicState.allMusics를 채웁니다.
 	onMount(async ()=> {
@@ -35,7 +37,7 @@
         </MusicListView>
     </div>
 
-    <div class="column detail-column">
+    <div class="column movie-column">
         {#if !musicUI.isMobile}
             <div class="desktop-player-area">
                 <MusicVideoPlayer />
@@ -50,10 +52,15 @@
             </RelatedMusicListView>
         </RelatedMusicContainer>
     </div>
+    <div class="column info-column">
+        <MusicInfo>
+            <MusicTextInfo />
+        </MusicInfo>
+    </div>
 </div>
 
 <style>
-    .detail-column{
+    .movie-column{
         margin-top: 40px;
     }
      /* 기본: 모바일 우선 (1열) */
@@ -80,7 +87,7 @@
             min-width: 300px;
         }
 
-        .detail-column {
+        .movie-column {
             position: sticky;
             top: 20px;
             width: 100%;
