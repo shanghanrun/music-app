@@ -16,7 +16,7 @@ class MusicUI{
 	}
 
 	searchTerm = $state('')
-	selectedIds = $state(new Set())
+	// selectedIds = $state(new Set())
 	title ="음악 목록"
 	sortKey = $state('title') // 사용자가 선택하는 값
 
@@ -33,6 +33,13 @@ class MusicUI{
 		return this.currentMusic?.id === id;
 	}
 
+	// 통계용: 조회수 상위 5개 계산
+    get topViewed() {
+        return [...musicState.allMusics]
+            .sort((a, b) => (b.viewed || 0) - (a.viewed || 0))
+            .slice(0, 5)
+	}
+
 	//1. 검색어 + 정렬이 통합된 리스트 (ListView에서 사용)
 	get list(){
 		// 먼저 검색어로 필터링  (검색어가 없을 경우는 전체 목록이 된다.)
@@ -41,22 +48,7 @@ class MusicUI{
 			m.title.toLowerCase().includes(term) || m.singer.toLowerCase().includes(term)
 		)) //제목, 가수
 
-		// 정렬 적용
-		// 기본 sort 폼   arr.sort((a,b)=> a-b)  오름차순
-		// 객체 문자인 경우 users.sort((a,b)=> a.name.localeCompare(b.name))
-		// 객체 숫자인 경우 users.sort((a,b)=> a.age - b.age)
-		//  내림차순으로 하려면 b.name.localeCompare(a.name) ; b.age-a.age
-		
-		// 현실적으로 sortKey는 소문자문자열로 적게 되므로 중간 검사는 빼고,
-		// filtered.sort((a,b)=> a[this.sortKey].localCompare(b[this.sortKey])) // 올림차순이 된다.
-		// 그러므로 최종적으로
-		// filtered.sort((a,b)=>{
-		// 	if (this.sortOrder === 'asc'){
-		// 		return a[this.sortKey].localeCompare(b[this.sortKey])
-		// 	} else{
-		// 		return b[this.sortKey].localeCompare(a[this.sortKey])
-		// 	}
-		// })
+
 
 		filtered.sort((a, b) => {
 			const valA = String(a[this.currentSortKey]); // 혹시 모를 숫자/null 대비 문자열화
@@ -103,18 +95,6 @@ class MusicUI{
     }
 
 
-	//2. 체크박스 몇개를 선택했는지 상태 확인 로직
-	get selectedCount(){ return this.selectedIds.size}
-	get hasChecked() {return this.selectedIds.size > 0} 
-
-	isChecked(id) { return this.selectedIds.has(id)} // 특정 항목이 체크되었는지 id로 확인
-
-	toggleCheck(id){ // 해당 id에 대해 체크상태를 반전하기
-		if (this.selectedIds.has(id)) this.selectedIds.delete(id)
-		else this.selectedIds.add(id)
-		this.selectedIds = new Set(this.selectedIds) // 새롭게 Set을 할당해서 반응성유도
-	}
-
 	// 3. 카드 표시 데이터 변환 로직 (Card에서 사용)
 	getDisplayInfo(item){ // 여기서  item은 개별 music객체
 		return {
@@ -127,27 +107,6 @@ class MusicUI{
         };
 	}
 
-	// 4. 삭제 통합 로직 (단일/다중 모두 처리)
-    async deleteSelected(targetId = null) { 
-		// 인자를 넣지 않을 경우에는, selectedIds를 참조해서 일괄 삭제.
-		// 인자로 단일 id를 넣을 경우에는 해당 id만 삭제
-        const ids = targetId ? [targetId] : Array.from(this.selectedIds);
-		//selectedIds는 Set자료라서 Array로 변환한 것
-
-        if (ids.length === 0) return;
-
-        if (confirm(`${ids.length}개의 항목을 삭제하시겠습니까?`)) {
-            
-            await musicActions.deleteMultiple(ids);
-            
-            // selectedIds 상태 정리: 삭제된 id들 Set에서 제거
-            ids.forEach(id => this.selectedIds.delete(id))
-            this.selectedIds = new Set(this.selectedIds);// svelte5에 반응성 전파
-        }
-    }
-	cancelSelected(){
-		this.selectedIds = new Set()
-	}
 
 	// 5. 재생 및 곡 선택 핸들러
     async handlePlay(music) {

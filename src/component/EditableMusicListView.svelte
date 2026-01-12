@@ -1,4 +1,5 @@
 <script>
+	import { musicFormUI } from './../store/musicFormUI.svelte.js';
     import { musicUI } from "../store/musicUI.svelte";
     let { children } = $props();
 </script>
@@ -29,10 +30,10 @@
                    placeholder="노래 제목이나 가수 검색..." />
         </div>
 
-        {#if musicUI.hasChecked}
+        {#if musicFormUI.hasChecked}
             <div class="batch-action-bar">
-                <span>{musicUI.selectedCount}개 선택됨</span>
-                <button onclick={() => musicUI.deleteSelected()}>일괄 삭제</button>
+                <span>{musicFormUI.selectedCount}개 선택됨</span>
+                <button onclick={() => musicFormUI.deleteSelected()}>일괄 삭제</button>
             </div>
         {/if}
     </header>

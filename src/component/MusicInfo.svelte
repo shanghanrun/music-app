@@ -1,7 +1,8 @@
 <script>
-    import { goto } from '$app/navigation';
-	import { musicUI } from '../store/musicUI.svelte';
-	let { children } = $props(); 
+import { goto } from '$app/navigation';
+import { verifyAdmin } from '$lib/store.svelte';
+import { musicUI } from '../store/musicUI.svelte';
+let { children } = $props(); 
 
 </script>
 
@@ -10,7 +11,7 @@
         <div class="info-header">
             <h3>Lyrics & Notes</h3>
             <div class="header-actions">
-                <button class="admin-btn" on:click={() => goto('/admin')}>Admin</button>
+                <button class="admin-btn" on:click={() => {if (verifyAdmin()) goto('/admin')}}>Admin</button>
             </div>
         </div>
 		<div class="card-container">

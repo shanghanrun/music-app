@@ -1,24 +1,25 @@
 <script>
-	import { musicUI } from '../store/musicUI.svelte';
+import { musicUI } from '../store/musicUI.svelte';
+
 
 </script>
 
 <div class="scroll-content">
     <div class="info-section">
         <label>Original</label>
-        <pre>{musicUI.currentMusic.lyric || '가사 없음'}</pre>
+        <pre>{musicUI.currentMusic?.lyric || '가사 없음'}</pre>
     </div>
 
     <div class="info-section">
         <label>Translation</label>
-        <pre>{musicUI.currentMusic.koLyric || '번역 없음'}</pre>
+        <pre>{musicUI.currentMusic?.koLyric || '번역 없음'}</pre>
     </div>
 
-    {#if musicUI.currentMusic.etc}
+    {#if musicUI.currentMusic?.etc}
         <div class="info-section etc-section">
             <label>Information</label>
             <div class="etc-content">
-				{@html musicUI.currentMusic.etc}</div> 
+				{@html musicUI.currentMusic?.etc  || ''}</div> 
             </div>
     {/if}
 </div>

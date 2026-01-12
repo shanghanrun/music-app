@@ -1,17 +1,17 @@
 import PocketBase from 'pocketbase';
 import { PUBLIC_PB_URL } from '$env/static/public'; 
+import { SvelteSet } from 'svelte/reactivity';
 
 // console.log("📡 연결하려는 PB 주소:", PUBLIC_PB_URL);
 export const pb = new PocketBase(PUBLIC_PB_URL)
 
 
 // 음악 앱 전역 상태
-export let musicState = $state({
+export const musicState = $state({
     allMusics: [],      // 서버에서 가져온 전체 음악 목록
-    favoriteIds: new Set(), // 사용자가 '좋아요' 한 음악 ID들
+    favoriteIds: new SvelteSet(), // 사용자가 '좋아요' 한 음악 ID들
     isLoading: false
 });
-
 
 
 

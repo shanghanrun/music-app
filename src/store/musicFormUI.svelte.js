@@ -1,12 +1,48 @@
 import { getThumbUrl } from '$lib/youtubeUtil';
+import { musicActions } from "$lib/pb.svelte"
 
 class MusicFormUI{
+    selectedIds = $state(new Set())
 	editMode = $state(false)
 	form = $state({
 		id: null,
 		title: '', genre: '', theme: '', src: '',
         lyric: '', koLyric: '', etc: '', image: null, thumbUrl:''
 	})
+
+    //2. 체크박스 몇개를 선택했는지 상태 확인 로직
+	get selectedCount(){ return this.selectedIds.size}
+	get hasChecked() {return this.selectedIds.size > 0} 
+
+	isChecked(id) { return this.selectedIds.has(id)} // 특정 항목이 체크되었는지 id로 확인
+
+	toggleCheck(id){ // 해당 id에 대해 체크상태를 반전하기
+		if (this.selectedIds.has(id)) this.selectedIds.delete(id)
+		else this.selectedIds.add(id)
+		this.selectedIds = new Set(this.selectedIds) // 새롭게 Set을 할당해서 반응성유도
+	}
+    // 4. 삭제 통합 로직 (단일/다중 모두 처리)
+        async deleteSelected(targetId = null) { 
+            // 인자를 넣지 않을 경우에는, selectedIds를 참조해서 일괄 삭제.
+            // 인자로 단일 id를 넣을 경우에는 해당 id만 삭제
+            const ids = targetId ? [targetId] : Array.from(this.selectedIds);
+            //selectedIds는 Set자료라서 Array로 변환한 것
+    
+            if (ids.length === 0) return;
+    
+            if (confirm(`${ids.length}개의 항목을 삭제하시겠습니까?`)) {
+                
+                await musicActions.deleteMultiple(ids);
+                
+                // selectedIds 상태 정리: 삭제된 id들 Set에서 제거
+                ids.forEach(id => this.selectedIds.delete(id))
+                this.selectedIds = new Set(this.selectedIds);// svelte5에 반응성 전파
+            }
+        }
+        cancelSelected(){
+            this.selectedIds = new Set()
+        }
+    
 
 	handleEdit(music){
 		editMode = true;

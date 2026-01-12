@@ -1,24 +1,22 @@
 <script>
-    import { musicUI } from "../store/musicUI.svelte"; 
-    import MusicListView from "../component/MusicListView.svelte";
+import { musicUI } from "../store/musicUI.svelte"; 
+import { musicActions } from "$lib/pb.svelte"; 
+import { onMount } from 'svelte';
 
-    import MusicCard from "../component/MusicCard.svelte";
+import MusicListView from "../component/MusicListView.svelte";
+import MusicCard from "../component/MusicCard.svelte";
+import MusicVideoPlayer from "../component/MusicVideoPlayer.svelte";
+import RelatedMusicContainer from "../component/RelatedMusicContainer.svelte";
 
-  	import { musicActions } from "$lib/pb.svelte"; 
-  	import { onMount } from 'svelte';
-  import MusicVideoPlayer from "../component/MusicVideoPlayer.svelte";
-  import RelatedMusicContainer from "../component/RelatedMusicContainer.svelte";
- 
-  import RelatedMusicListView from "../component/RelatedMusicListView.svelte";
-  import RelatedMusicCard from "../component/RelatedMusicCard.svelte";
-  import MusicInfo from "../component/MusicInfo.svelte";
-  import MusicTextInfo from "../component/MusicTextInfo.svelte";
+import RelatedMusicListView from "../component/RelatedMusicListView.svelte";
+import RelatedMusicCard from "../component/RelatedMusicCard.svelte";
+import MusicInfo from "../component/MusicInfo.svelte";
+import MusicTextInfo from "../component/MusicTextInfo.svelte";
 
 	// 1. 페이지가 열리면 서버에서 데이터를 싹 긁어와서 musicState.allMusics를 채웁니다.
 	onMount(async ()=> {
 		await musicActions.init(); // 데이터 먼저 로드
-		musicUI.init(); // UI 초기화. 현재 곡 등
-		
+		musicUI.init(); // UI 초기화. 현재 곡 등		
 	}) 
 </script>
 

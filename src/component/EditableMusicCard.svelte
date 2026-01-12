@@ -4,12 +4,12 @@
     let { item } = $props();
 
     const info = $derived(musicUI.getDisplayInfo(item));
-    const isChecked = $derived(musicUI.isChecked(item.id));
+    const isChecked = $derived(musicFormUI.isChecked(item.id));
 </script>
 
 <div class="music-card-item" class:is-checked={isChecked}>
     <label class="check-container">
-        <input type="checkbox" checked={isChecked} onchange={() => musicUI.toggleCheck(item.id)} />
+        <input type="checkbox" checked={isChecked} onchange={() => musicFormUI.toggleCheck(item.id)} />
     </label>
 
     <div class="img-box">
@@ -23,7 +23,7 @@
 
     <div class="btn-group">
         <button class="edit" onclick={() => musicFormUI.handleEdit(item)}>✏️</button>
-        <button class="del" onclick={() => musicUI.deleteSelected(item.id)}>🗑️</button>
+        <button class="del" onclick={() => musicFormUI.deleteSelected(item.id)}>🗑️</button>
     </div>
 </div>
 
