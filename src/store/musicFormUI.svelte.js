@@ -79,7 +79,11 @@ class MusicFormUI{
         });
 
         // 제대로 된 데이터가 안 들어왔을 경우 취소
-        if (!formData.title || !formData.singer) return
+        if (!formData.title || !formData.singer) {
+            console.log('저장에러..')
+            console.log('formData: ', formData)
+            return
+        }
 
         if (this.editMode) { // editMode일 경우는 update함수 실행(입력난만 교체)
             musicActions.updateMusic(this.form.id, formData);
