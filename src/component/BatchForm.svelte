@@ -5,7 +5,7 @@
 
 <div class="batch-wrapper">
   <div class="input-group">
-    <label for="batch-text">데이터 일괄 추가</label>
+    <label for="batch-text" class="batch-text">데이터 일괄 추가</label>
     <div class="textarea-container">
       <textarea 
         id="batch-text"
@@ -55,6 +55,7 @@
     line-height: 1.6;
     resize: none;
     outline: none;
+    background: rgb(240, 240, 240);
   }
 
   /* 이미지에서 표시하신 우측 초록색 세로 박스 영역 (마진 효과) */
@@ -86,5 +87,8 @@
   .primary-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+  }
+  .batch-text{
+    font-size: 1.2rem;
   }
 </style>

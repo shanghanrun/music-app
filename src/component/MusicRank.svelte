@@ -11,16 +11,41 @@
 		<button class="refresh-btn" onclick={() => musicActions.init()}>업데이트</button>
 		<button class="home-btn" onclick={() => goto('/')}>Home</button>
 	</header>
-	<ul class="top-list">
+	<div class="top-list">
 		{@render children?.()}
-	</ul>
+	</div>
 </section>
 
 <style>
+	/* .top-list{
+		width: 100%;
+	} */
 	header { 
         flex-shrink: 0; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 12px;
     }
-    header h3 { margin: 0; font-size: 1.2rem; color: #1f1f1f; display: flex; align-items: center; }
-	.top-list li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f2f5; }
+    header h3 { margin: 0; font-size: 1.2rem; color: #1f1f1f;
+		 display: flex; align-items: center; 
+		margin-bottom: 5px;
+	}
+	
+	.refresh-btn{
+		background: rgb(94, 140, 247);
+		border-radius: 8px;
+		border: none;
+		padding: 5px;
+		margin-right: 5px;
+	}
+	.home-btn{
+		background: rgb(25, 217, 25);
+		border-radius: 8px;
+		border: none;
+		padding: 5px;
+	}
+	.refresh-btn:hover{
+		background: rgb(61, 116, 244);
+	}
+	.home-btn:hover{
+		background: rgb(18, 166, 18);
+	}
 
 </style>

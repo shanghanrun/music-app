@@ -47,13 +47,13 @@ let { children } = $props();
     .admin-btn {
         padding: 6px 12px;
         font-size: 0.8rem;
-        background: #eee;
+        background: #a7d50e;
         border: none;
         border-radius: 4px;
         cursor: pointer;
     }
     .admin-btn:hover {
-        background: #ddd;
+        background: #89ae12;
     }
     .empty-state {
         color: #999;
