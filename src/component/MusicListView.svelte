@@ -13,10 +13,24 @@
             <h3>{musicUI.title} <span class="count-badge">{musicUI.list.length}</span></h3>
 
             <div class="play-mode-group">
+                <button class={getModeClass('linear')} onclick={() => musicUI.playMode = 'linear'}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+                </button>
+                
+                <button class={getModeClass('shuffle')} onclick={() => musicUI.playMode = 'shuffle'}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg>
+                </button>
+                
+                <button class={getModeClass('standard')} onclick={() => musicUI.playMode = 'standard'}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+                </button>
+            </div>
+
+            <!-- <div class="play-mode-group">
                 <button class={getModeClass('linear')} onclick={() => musicUI.playMode = 'linear'}>연속</button>
                 <button class={getModeClass('shuffle')} onclick={() => musicUI.playMode = 'shuffle'}>셔플</button>
                 <button class={getModeClass('standard')} onclick={() => musicUI.playMode = 'standard'}>표준</button>
-            </div>            
+            </div>             -->
         </div>
 
         <div class="controls">
@@ -96,6 +110,9 @@
         background: #4caf50;
         color: white;
         border-color: #4caf50;
+    }
+    .play-mode-group button:hover {
+        background: #9ad8ab;
     }
     
     .controls { display: flex; gap: 8px; margin-bottom: 12px; }
