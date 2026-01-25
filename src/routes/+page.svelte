@@ -35,6 +35,7 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
 
 <div class="app-layout">
     <div class="column list-column">
+        <a href="https://hani.chois.cloud" class="doc"> 문서작업으로 돌아가기 </a>
         <MusicListView>
             {#if musicUI.isMobile}
                 <div class="mobile-player-area">
@@ -73,6 +74,12 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
 </div>
 
 <style>
+    .doc{
+        margin-left: 233px;
+        background: rgb(118, 255, 6);
+        margin-bottom: 5px;
+        padding: 3px;
+    }
     .movie-column{
         margin-top: 40px;
     }
