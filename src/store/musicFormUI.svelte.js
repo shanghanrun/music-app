@@ -6,7 +6,9 @@ class MusicFormUI{
 	editMode = $state(false)
 	form = $state({
 		id: null,
-		title: '', genre: '', theme: '', src: '',
+		title: '', 
+        singer:'',
+        genre: '', theme: '', src: '',
         lyric: '', koLyric: '', etc: '', image: null, thumbUrl:''
 	})
 
@@ -56,7 +58,8 @@ class MusicFormUI{
 	// 초기화(입력난 비우기) 및 새로고침 함수
 	resetForm=()=>{
 		this.editMode = false;
-		this.form = { id: null, title: '', genre: '', theme: '', src: '', lyric: '', koLyric: '', etc: '', image: null, thumbUrl:'' }
+		this.form = { id: null, title: '',
+            singer:'', genre: '', theme: '', src: '', lyric: '', koLyric: '', etc: '', image: null, thumbUrl:'' }
 	}
 
 	// 저장(등록/수정) 처리
