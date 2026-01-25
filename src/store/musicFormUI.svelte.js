@@ -22,7 +22,7 @@ class MusicFormUI{
 		this.selectedIds = new Set(this.selectedIds) // 새롭게 Set을 할당해서 반응성유도
 	}
     // 4. 삭제 통합 로직 (단일/다중 모두 처리)
-        async deleteSelected(targetId = null) { 
+        deleteSelected=async(targetId = null)=> { 
             // 인자를 넣지 않을 경우에는, selectedIds를 참조해서 일괄 삭제.
             // 인자로 단일 id를 넣을 경우에는 해당 id만 삭제
             const ids = targetId ? [targetId] : Array.from(this.selectedIds);
