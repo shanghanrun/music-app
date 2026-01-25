@@ -40,7 +40,7 @@ class MusicUI{
 
 
 	// 1. 다음 곡 재생 로직 (유튜브 Player API의 onEnded 이벤트 등에서 호출)
-    playNext = () => {
+    playNext = async () => {
         if (this.list.length === 0 || !this.currentMusic) return;
 
 		// 1. 표준 모드일 때 처리
@@ -75,7 +75,7 @@ class MusicUI{
 		// 현재 재생 중인 '객체' 자체를 확실히 고정합니다.
 		this.currentMusic = this.list[nextIndex];
 		this.isPlaying = true;
-        
+
         // ⭐️ 핵심: 연속/셔플 재생 시에는 스크롤을 올리지 않고 재생만 합니다.
         this.autoHandlePlay(nextMusic);
     }
@@ -90,6 +90,9 @@ class MusicUI{
         music.viewed = (music.viewed || 0) + 1;
 
         // [참고] 여기서는 scrollToTop()을 호출하지 않습니다!
+
+		// viewed도 자동증가시킨다.
+		await musicActions.incrementView(music.id)
     }
 
     // 3. 기존 handlePlay 수정 (사용자가 직접 클릭했을 때)

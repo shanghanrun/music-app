@@ -1,4 +1,5 @@
 <script>
+  import { musicActions } from "$lib/pb.svelte";
     import { musicUI } from "../store/musicUI.svelte";
     let { item } = $props();
 
@@ -9,7 +10,11 @@
 	
 </script>
 
-<button class="music-card-item" class:active={isCurrent} onclick={()=>musicUI.selectMusic(item)}>
+<button class="music-card-item" class:active={isCurrent} 
+    onclick={async()=>{
+        musicUI.selectMusic(item);
+        await musicActions.incrementView(item.id)
+        }}>
     <div class="img-wrapper">
         <img src={item.thumbUrl} alt={item.title} />
     </div>
@@ -20,9 +25,10 @@
     </div>
 
     <div class="play-control-btn" 
-        onclick={(e) => {
+        onclick={async(e) => {
             e.stopPropagation(); // 카드 전체 클릭 이벤트가 발생하지 않도록 막음
             musicUI.handlePlay(item);
+            await musicActions.incrementView(item.id)
         }}
     >
         {#if isCurrent && musicUI.isPlaying}
