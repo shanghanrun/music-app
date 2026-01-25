@@ -14,9 +14,9 @@ class MusicFormUI{
 	get selectedCount(){ return this.selectedIds.size}
 	get hasChecked() {return this.selectedIds.size > 0} 
 
-	isChecked(id) { return this.selectedIds.has(id)} // 특정 항목이 체크되었는지 id로 확인
+	isChecked=(id)=> { return this.selectedIds.has(id)} // 특정 항목이 체크되었는지 id로 확인
 
-	toggleCheck(id){ // 해당 id에 대해 체크상태를 반전하기
+	toggleCheck=(id)=>{ // 해당 id에 대해 체크상태를 반전하기
 		if (this.selectedIds.has(id)) this.selectedIds.delete(id)
 		else this.selectedIds.add(id)
 		this.selectedIds = new Set(this.selectedIds) // 새롭게 Set을 할당해서 반응성유도
@@ -44,8 +44,8 @@ class MusicFormUI{
         }
     
 
-	handleEdit(music){
-		editMode = true;
+	handleEdit=(music)=>{
+		this.editMode = true;
 		if(!music.thumbUrl){
 			music.thumbUrl = getThumbUrl(music.src)
 		} // 유투브 동영상주소로 자동으로 썸네일데이터 넣어주기
@@ -54,13 +54,13 @@ class MusicFormUI{
 	}
 
 	// 초기화(입력난 비우기) 및 새로고침 함수
-	resetForm(){
-		editMode = false;
+	resetForm=()=>{
+		this.editMode = false;
 		this.form = { id: null, title: '', genre: '', theme: '', src: '', lyric: '', koLyric: '', etc: '', image: null, thumbUrl:'' }
 	}
 
 	// 저장(등록/수정) 처리
-    handleSave() {
+    handleSave=()=> {
         const formData = new FormData();
        
         Object.keys(this.form).forEach(key => {
@@ -75,7 +75,7 @@ class MusicFormUI{
             }
         });
 
-        if (editMode) { // editMode일 경우는 update함수 실행(입력난만 교체)
+        if (this.editMode) { // editMode일 경우는 update함수 실행(입력난만 교체)
             musicActions.updateMusic(this.form.id, formData);
         } else { // editMode가 아닌, 직접 입력시
             musicActions.createMusic(formData);

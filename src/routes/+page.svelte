@@ -12,12 +12,25 @@ import RelatedMusicListView from "../component/RelatedMusicListView.svelte";
 import RelatedMusicCard from "../component/RelatedMusicCard.svelte";
 import MusicInfo from "../component/MusicInfo.svelte";
 import MusicTextInfo from "../component/MusicTextInfo.svelte";
+  import GuestBook from "../component/GuestBook.svelte";
+
 
 	// 1. 페이지가 열리면 서버에서 데이터를 싹 긁어와서 musicState.allMusics를 채웁니다.
 	onMount(async ()=> {
 		await musicActions.init(); // 데이터 먼저 로드
-		musicUI.init(); // UI 초기화. 현재 곡 등		
+        await musicUI.loadReviews()
+		musicUI.init(); // UI 초기화. 현재 곡 등
+
 	}) 
+
+    $effect(()=>{
+        // if(musicUI.reviews.length > 0){
+        //     musicUI.loadReviews()
+        // }
+        if(musicUI.reviewTrigger> -1){
+            musicUI.loadReviews()
+        }
+    })
 </script>
 
 <div class="app-layout">
@@ -49,12 +62,14 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
                 {/each}
             </RelatedMusicListView>
         </RelatedMusicContainer>
+
+        <GuestBook />
     </div>
     <div class="column info-column">
         <MusicInfo>
             <MusicTextInfo />
         </MusicInfo>
-    </div>
+    </div>    
 </div>
 
 <style>

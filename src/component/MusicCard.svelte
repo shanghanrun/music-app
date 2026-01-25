@@ -40,7 +40,13 @@
         background: #f9f9f9; border-radius: 12px; transition: all 0.2s ease;
         border: 1px solid transparent; width: 100%; cursor: pointer; text-align: left;
     }
-    .music-card-item:hover { background: #f0f0f0; }
+    .music-card-item:hover { 
+        background: #e6e8e7; 
+        transform: translateY(-0.7px); transition: 0.2s;
+        /* background-color: #fcfcfc; 아주 살짝 밝아지는 느낌 */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 아주 연한 그림자 */
+        border-color: #eee; /* 테두리도 은근하게 강조 */
+    }
     .music-card-item.active { 
         background: #e8f5e9; border-color: #4caf50; 
         box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);

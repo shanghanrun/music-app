@@ -44,20 +44,46 @@ export const musicStore = $state({
 
     // DB에 일괄 저장하는 함수
     async batchInsert(rawText) {
-		// 작업 전 비밀번호 확인
-		if (!verifyAdmin()) return;
+        // 작업 전 비밀번호 확인
+        if (!verifyAdmin()) return;
 
         const parsedData = this.transferText2Data(rawText);
         if (parsedData.length === 0) return alert("입력된 데이터가 없거나 형식이 잘못되었습니다.");
 
+        let successCount = 0;
+        let failList = []; // 실패한 곡 정보를 담을 리스트
+
         try {
             for (const item of parsedData) {
-                await pb.collection('musics').create(item);
+                try {
+                    // 한 곡씩 시도
+                    await pb.collection('musics').create(item);
+                    successCount++;
+                } catch (singleErr) {
+                    // 에러 발생 시 멈추지 않고 기록만 함
+                    console.error(`❌ 저장 실패: ${item.title}`, singleErr);
+                    failList.push(`${item.title} (이유: ${singleErr.message})`);
+                }
             }
-            alert(`${parsedData.length}곡이 성공적으로 등록되었습니다!`);
-            location.reload(); // 간단하게 목록 갱신
+
+            // 결과 보고
+            let resultMsg = `${successCount}곡이 성공적으로 등록되었습니다!`;
+            
+            if (failList.length > 0) {
+                resultMsg += `\n\n⚠️ 실패한 항목 (${failList.length}건):\n` + failList.join('\n');
+                alert(resultMsg); // 실패 내역이 있으면 상세히 알림
+            } else {
+                alert(resultMsg);
+            }
+
+            // 성공한 게 하나라도 있다면 목록 갱신
+            if (successCount > 0) {
+                location.reload();
+            }
+
         } catch (err) {
-            console.error("DB 저장 중 오류:", err);
+            console.error("일괄 작업 중 예기치 못한 전체 오류:", err);
         }
-    }
-});
+    } 
+    // 중복된 src(동영상)이 들어오는 것을 막기 위해, db에 src항목을 unique로 체크한다.
+})

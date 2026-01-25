@@ -22,7 +22,7 @@ export const musicActions = {
         try {
             // PocketBase에서 musics 컬렉션의 모든 데이터를 가져옴 (생성일 역순)
             const records = await pb.collection('musics').getFullList({
-                sort: '-created',
+                sort: '-viewed',
             });
             
             // 가져온 데이터를 상태에 저장
@@ -125,4 +125,23 @@ export const musicActions = {
 			console.error("Silent view increment failed:", err);
 		}
 	}
+};
+
+export const reviewActions = {
+    //reviews컬렉션은 music뿐만 아니라, 다양한 곳에서의 리뷰를 모으는 컬렉션,
+    // 그래서 music에 관한 review는 music필드에 텍스트로 저장된다.
+    async addReview(content) {
+        try {
+            const data = {
+                // "music": musicId,      // 연결된 음악 ID
+                "music": content,       // 감상평 내용
+                "isDeleted": false     // 기본값
+            };
+            const record = await pb.collection('reviews').create(data);
+            return record.music;
+        } catch (error) {
+            console.error("리뷰 저장 실패:", error);
+            throw error;
+        }
+    }
 };
