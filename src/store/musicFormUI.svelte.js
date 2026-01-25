@@ -80,7 +80,7 @@ class MusicFormUI{
         } else { // editMode가 아닌, 직접 입력시
             musicActions.createMusic(formData);
         }
-        resetForm();
+        this.resetForm();
     }
 
 }
