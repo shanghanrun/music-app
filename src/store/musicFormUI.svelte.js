@@ -63,7 +63,7 @@ class MusicFormUI{
 	}
 
 	// 저장(등록/수정) 처리
-    handleSave=()=> {
+    handleSave=async()=> {
         const formData = new FormData();
        
         Object.keys(this.form).forEach(key => {
@@ -86,9 +86,9 @@ class MusicFormUI{
         }
 
         if (this.editMode) { // editMode일 경우는 update함수 실행(입력난만 교체)
-            musicActions.updateMusic(this.form.id, formData);
+            await musicActions.updateMusic(this.form.id, formData);
         } else { // editMode가 아닌, 직접 입력시
-            musicActions.createMusic(formData);
+            await musicActions.createMusic(formData);
         }
         this.resetForm();
     }
