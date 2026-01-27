@@ -13,6 +13,8 @@
     let activeDirection = $state<'up' | 'down' | null>(null); // 현재 클릭된 방향 상태
 
     function handleAction(direction: 'up' | 'down') {
+        // 1. 시각적 피드백: 즉시 해당 방향을 '활성화' 상태로 변경
+        activeDirection = direction;
         // 1. 현재 화면에 실질적인 스크롤바가 생겼는지 확인
         const hasScroll = document.documentElement.scrollHeight > window.innerHeight;
 
