@@ -38,7 +38,7 @@
             width: '100%',
             videoId: videoId,
             playerVars: {
-                'autoplay': musicUI.isPlaying ? 1 : 0,
+                'autoplay':  1 ,
                 'controls': 1,
                 'origin': window.location.origin // 보안 및 도메인 허용 설정
             },
