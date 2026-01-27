@@ -124,19 +124,21 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
         display: grid;
         grid-template-columns: 1fr; /* 모바일은 1열 고정 */
         gap: 20px;
-        max-width: 1400px;
+        max-width: 980px;/* 1024에서 980으로 조정하여 여유 확보 */
         margin: 0 auto;
         padding: 10px;
     }
 
     /* 화면이 커졌을 때 (데스크톱 - 2칼럼) */
-    /* 테스트를 위해 1024px 대신 768px로 낮춰서 확인해보세요 */
-    @media (min-width: 1024px) { 
+   /* 모바일 전용 (화면 폭이 768px 이하일 때) */
+    @media (min-width: 768px) { 
         .app-layout {
             /* !important는 최후의 수단이지만, 테스트용으로 넣어보세요 */
             grid-template-columns: 400px 1fr !important; 
             display: grid !important;
             align-items: start;
+            max-width: 100%; /* 핸드폰에서는 꽉 차게 */
+            padding: 0 15px; /* 양옆에 아주 약간의 여백만 부여 */
         }
 
         .list-column {

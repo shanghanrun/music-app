@@ -10,6 +10,7 @@
 
     // 페이지 성격에 따른 스타일 분기 (URL 기반)
     let isMusicPage = $derived(page.url.pathname.includes('music')); 
+    let activeDirection = $state<'up' | 'down' | null>(null); // 현재 클릭된 방향 상태
 
     function handleAction(direction: 'up' | 'down') {
         // 1. 현재 화면에 실질적인 스크롤바가 생겼는지 확인
@@ -22,6 +23,11 @@
                 top: direction === 'up' ? -moveDistance : moveDistance,
                 behavior: 'smooth'
             });
+
+            // 3. 2초(2000ms) 후에 원래대로 복귀
+            setTimeout(() => {
+                activeDirection = null;
+            }, 2000);
         } 
         else {
             // [상황 B] 스크롤바가 없는 경우: 외부 객체(bookWork 등) 연동 시도
