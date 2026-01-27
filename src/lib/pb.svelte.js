@@ -110,6 +110,7 @@ export const musicActions = {
     },
 	async incrementView(musicId) {
 		try {
+            console.log('viewed 증가 로직 시작')
 			// 유저에게 알리지 않고 백그라운드에서 실행
 			const record = await pb.collection('musics').update(musicId, {
 				'viewed+': 1  // 기존 값에서 1을 더해주는 PocketBase 문법
@@ -119,6 +120,7 @@ export const musicActions = {
 			const index = musicState.allMusics.findIndex(m => m.id === musicId);
 			if (index !== -1) {
 				musicState.allMusics[index].viewed = record.viewed;
+                console.log('viewed가 증가했습니다.')
 			}
 		} catch (err) {
 			// 사용자에게 경고창을 띄우지 않고 콘솔에만 기록 (사용자 경험 방해 금지)

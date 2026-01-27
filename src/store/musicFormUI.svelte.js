@@ -6,7 +6,9 @@ class MusicFormUI{
 	editMode = $state(false)
 	form = $state({
 		id: null,
-		title: '', genre: '', theme: '', src: '',
+		title: '', 
+        singer:'',
+        genre: '', theme: '', src: '',
         lyric: '', koLyric: '', etc: '', image: null, thumbUrl:''
 	})
 
@@ -56,12 +58,14 @@ class MusicFormUI{
 	// 초기화(입력난 비우기) 및 새로고침 함수
 	resetForm=()=>{
 		this.editMode = false;
-		this.form = { id: null, title: '', genre: '', theme: '', src: '', lyric: '', koLyric: '', etc: '', image: null, thumbUrl:'' }
+		this.form = { id: null, title: '',
+            singer:'', genre: '', theme: '', src: '', lyric: '', koLyric: '', etc: '', image: null, thumbUrl:'' }
 	}
 
 	// 저장(등록/수정) 처리
-    handleSave=()=> {
+    handleSave=async()=> {
         const formData = new FormData();
+        console.log('현재 편집중인 폼: ', this.form)
        
         Object.keys(this.form).forEach(key => {
             if (key === 'image') {
@@ -75,10 +79,28 @@ class MusicFormUI{
             }
         });
 
+        console.log('forEach를 거친 후의 폼: ', formData)
+
+        // 제대로 된 데이터가 안 들어왔을 경우 취소
+        // [수정 포인트] FormData의 값은 .get()으로 가져와야 합니다.
+        const title = formData.get('title');
+        const singer = formData.get('singer');
+
+        // 데이터 검증
+        if (!title || !singer) {
+            console.error('저장에러: 제목과 가수는 필수입니다.');
+            // 실제 데이터 확인용 로그
+            console.log('실제 들어간 데이터 확인:', Array.from(formData.entries())); 
+            return;
+        }
+       
+
         if (this.editMode) { // editMode일 경우는 update함수 실행(입력난만 교체)
-            musicActions.updateMusic(this.form.id, formData);
+            await musicActions.updateMusic(this.form.id, formData);
+            alert('수정완료')
         } else { // editMode가 아닌, 직접 입력시
-            musicActions.createMusic(formData);
+            await musicActions.createMusic(formData);
+            alert('추가완료')
         }
         this.resetForm();
     }

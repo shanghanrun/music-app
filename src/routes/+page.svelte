@@ -35,6 +35,13 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
 
 <div class="app-layout">
     <div class="column list-column">
+        <div class="nav-header">
+            <a href="https://hani.chois.cloud" class="back-link">
+                <span class="icon">&larr;</span> 
+                <span class="text">문서 작업으로 돌아가기</span>
+            </a>
+        </div>
+        <!-- <a href="https://hani.chois.cloud" class="doc"> 문서작업으로 돌아가기 </a> -->
         <MusicListView>
             {#if musicUI.isMobile}
                 <div class="mobile-player-area">
@@ -73,6 +80,42 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
 </div>
 
 <style>
+    .nav-header {
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: #6b7280; /* 너무 튀지 않는 차분한 회색 */
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        padding: 6px 12px;
+        border-radius: 20px; /* 알약 모양 */
+        background: #f3f4f6; /* 연한 배경색 */
+    }
+
+    .back-link:hover {
+        color: #3b82f6; /* 호버 시 파란색으로 포인트 */
+        background: #eff6ff;
+        transform: translateX(-4px); /* 왼쪽으로 살짝 움직이는 애니메이션 */
+    }
+
+    .back-link .icon {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    .doc{
+        margin-left: 233px;
+        background: rgb(118, 255, 6);
+        margin-bottom: 5px;
+        padding: 3px;
+    }
     .movie-column{
         margin-top: 40px;
     }

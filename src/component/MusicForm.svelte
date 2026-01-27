@@ -163,10 +163,16 @@ import { musicFormUI } from "../store/musicFormUI.svelte";
         background-color: #3b82f6;
         color: white;
     }
+    .save-btn:hover{
+        background-color: #2a77f3;
+    }
 
     .cancel-btn {
         background-color: #e5e7eb;
         color: #374151;
+    }
+    .cancel-btn:hover{
+        background: #d1d9e8;
     }
 
     button:hover {

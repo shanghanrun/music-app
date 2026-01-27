@@ -45,7 +45,7 @@ export const musicStore = $state({
     // DB에 일괄 저장하는 함수
     async batchInsert(rawText) {
         // 작업 전 비밀번호 확인
-        if (!verifyAdmin()) return;
+        // if (!verifyAdmin()) return;
 
         const parsedData = this.transferText2Data(rawText);
         if (parsedData.length === 0) return alert("입력된 데이터가 없거나 형식이 잘못되었습니다.");
