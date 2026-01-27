@@ -4,6 +4,8 @@ import { pb } from "$lib/pb.svelte"
 
 class MusicUI{
 	isMobile = $state(false)
+	// 나만의 통계: 사용자 방문 횟수 (로컬 스토리지 연동 권장)
+    visited = $state(0);
 
 	constructor(){
 		//클라이언트 사이드인 경우에만 리스너등록
@@ -71,13 +73,15 @@ class MusicUI{
 			if (nextIndex >= this.list.length) nextIndex = 0;
 		}
 
-		// ⭐️ 중요: 단순히 인덱스로 바꾸는 게 아니라, 
-		// 현재 재생 중인 '객체' 자체를 확실히 고정합니다.
-		this.currentMusic = this.list[nextIndex];
-		this.isPlaying = true;
-
-        // ⭐️ 핵심: 연속/셔플 재생 시에는 스크롤을 올리지 않고 재생만 합니다.
-        this.autoHandlePlay(nextMusic);
+		const nextMusic = this.list[nextIndex];
+        
+        if (nextMusic) {
+            this.currentMusic = nextMusic; // 현재 곡 교체
+            this.isPlaying = true;
+            
+            // ⭐️ 시스템 자동 재생 함수 호출 (스크롤 안 함)
+            this.autoHandlePlay(nextMusic);
+        }
     }
 
     // 2. 수동 클릭이 아닌 '시스템'에 의한 자동 재생용 함수
@@ -99,22 +103,24 @@ class MusicUI{
     handlePlay = async (music) => {
 		this.isManualSelection = true; // 수동 선택임을 명시
 
-        if (this.currentMusic?.id === music.id) {
-            this.isPlaying = !this.isPlaying;
-        } else {
-            this.currentMusic = music;
-            this.isPlaying = true;
+        // 1. 같은 곡을 눌렀을 때: 토글
+		if (this.currentMusic?.id === music.id) {
+			this.isPlaying = !this.isPlaying;
+		} 
+		// 2. 다른 곡을 눌렀을 때: 곡 변경 및 무조건 재생
+		else {
+			this.currentMusic = music;
+			this.isPlaying = true;
 
-            await musicActions.updateMusic(music.id, { 
-                viewed: (music.viewed || 0) + 1 
-            });
-            music.viewed = (music.viewed || 0) + 1;
-        }
+			// 조회수 증가 (DB업데이트)
+			await musicActions.incrementView(music.id);
+			// 로컬 데이터 즉시 반영 (화면 숫자 갱신용)
+			music.viewed = (music.viewed || 0) + 1;
+		}
 
-        // 사용자가 '직접' 목록에서 곡을 선택했을 때만 상단으로 보냅니다.
-        if(this.isMobile){
-            this.scrollToTop();
-        }
+		if(this.isMobile){
+			this.scrollToTop();
+		}
     }
 
 	// 플레이리스트의 카드에서, 선택하면 버튼에 의해서 currentMusic에 등록되는데, 플레이버튼을 누르면 플레이가 되고, 다시 한번 누르면 멈추게 하려면, isCurrent 여부가 중요하다.
@@ -238,13 +244,14 @@ class MusicUI{
     async init() {
         this.searchTerm = '';
         this.selectedIds = new Set();
-        // this.isPlaying = false; //처음은 연속재생
+        this.isPlaying = false; // 초기에는 정지 상태로 시작(유투브 정책 대응)
 		this.playMode ='linear'
         // 첫 번째 곡을 기본 선택값으로 잡고 싶다면 musicActions.init() 이후에 실행
         if (musicState.allMusics.length > 0) {
-            this.currentMusic = musicState.allMusics[0];
-			console.log("현재음악:", this.currentMusic.src)
-        }
+        // 첫 곡을 명시적으로 할당
+        this.currentMusic = musicState.allMusics[0];
+        console.log("초기 곡 설정 완료:", this.currentMusic.title);
+    }
     }
 
 	saveReview=async()=> {
@@ -283,7 +290,9 @@ class MusicUI{
         } catch (e) {
             console.error("리뷰 로드 실패:", e);
         }
-    }   
+    }  
+	
+	
 }
 
 export const musicUI = new MusicUI();

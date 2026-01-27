@@ -121,7 +121,7 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
         width: 100%;
         max-width: 100vw; /* 브라우저 폭을 넘지 않게 고정 */
         margin: 0 auto;
-        padding: 10px; /* 모바일 좌우 여백 */
+        padding: 2px; /* 모바일 좌우 여백 */
         box-sizing: border-box; /* 패딩이 폭에 포함되도록 */
         gap: 20px;
     }
@@ -133,7 +133,7 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
             grid-template-columns: 400px 1fr; 
             align-items: start;
             max-width: 1200px; /* 데스크톱에선 너무 퍼지지 않게 제한 */
-            padding: 20px;
+            padding: 2px;
         }
 
         .movie-column {
@@ -159,22 +159,19 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
 
 
 
-    /* 이미지/비디오가 박스를 뚫고 나가지 않게 강제 */
-    .mobile-player-area, .desktop-player-area {
-        width: 100%;
-        max-width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
+    .mobile-player-area {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: white;
+        margin-bottom: 15px;
     }
 
     .desktop-player-area {
+        margin-bottom: 20px;
+        border-radius: 12px;
+        overflow: hidden;
         background: #000;
         aspect-ratio: 16 / 9;
-    }
-
-    /* 스크린샷에서 보인 리스트 아이템들이 꽉 차게 */
-    :global(.MusicCard) {
-        width: 100% !important;
-        box-sizing: border-box;
     }
 </style>

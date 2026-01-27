@@ -11,10 +11,12 @@
 </script>
 
 <button class="music-card-item" class:active={isCurrent} 
-    onclick={async()=>{
-        musicUI.selectMusic(item);
-        await musicActions.incrementView(item.id)
-        }}>
+    onclick={async () => {
+        // 1. 이미 재생 중인 곡이면 일시정지/재생 토글
+        // 2. 새로운 곡이면 선택 후 바로 재생
+        await musicUI.handlePlay(item); 
+        // incrementView는 handlePlay 내부에서 이미 호출하므로 여기서 중복 호출 금지!
+    }}>
     <div class="img-wrapper">
         <img src={item.thumbUrl} alt={item.title} />
     </div>
