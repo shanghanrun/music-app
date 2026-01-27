@@ -90,17 +90,17 @@ export const musicActions = {
             throw err;
         }
     },
-    async deleteMultiple(ids){
+    async deleteMultiple(ids) {
         try {
-            // PocketBase에서 삭제
-            for (const id of ids){
+            // 1. 서버(PocketBase)에서 삭제
+            // (순차적으로 삭제하지만, 병렬로 하려면 Promise.all을 써도 됩니다)
+            for (const id of ids) {
                 await pb.collection('musics').delete(id);
             }
-            // 로컬 상태에서 삭제 (UI 즉시 반영)
-            musicState.allMusics = musicState.allMusics.filter(m => m.id !== id);
-            
-            // 만약 현재 재생 중인 곡이 삭제된 곡이라면 첫 번째 곡으로 변경
-            // (selectedMusic은 컴포넌트 레벨에서 관리하므로 컴포넌트 로직에서 처리 권장)
+
+            // 2. [핵심 수정] 로컬 상태 반영
+            // 내가 방금 지운 'ids' 목록에 포함되지 않은 녀석들만 남긴다!
+            musicState.allMusics = musicState.allMusics.filter(m => !ids.includes(m.id));
             
             console.log(`✅ ${ids.length}개 음악이 삭제되었습니다.`);
         } catch (err) {

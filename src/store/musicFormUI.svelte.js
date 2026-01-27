@@ -37,8 +37,7 @@ class MusicFormUI{
                 await musicActions.deleteMultiple(ids);
                 
                 // selectedIds 상태 정리: 삭제된 id들 Set에서 제거
-                ids.forEach(id => this.selectedIds.delete(id))
-                this.selectedIds = new Set(this.selectedIds);// svelte5에 반응성 전파
+                this.selectedIds = new Set();// 체크박스 싹 지우기
             }
         }
         cancelSelected(){
