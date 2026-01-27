@@ -109,7 +109,8 @@
 </div>
 
 <style>
-    .video-container { width: 100%; background: #000; border-radius: 12px; overflow: hidden; }
+    .video-container { width: 100%; background: #000; border-radius: 12px; overflow: hidden; 
+    margin-bottom: 20px}
     .iframe-wrapper { position: relative; padding-top: 56.25%; height: 0; }
     .iframe-wrapper :global(iframe) { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     .placeholder { height: 300px; display: flex; align-items: center; justify-content: center; color: #666; background: #f5f5f5; }

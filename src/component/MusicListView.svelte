@@ -174,6 +174,6 @@
         .music-list-wrapper { padding: 12px; }
         .title-row { flex-direction: column; align-items: flex-start; gap: 10px; }
         .play-mode-group { width: 100%; justify-content: space-between; }
-        .play-mode-group button { flex: 1; text-align: center; }
+        .play-mode-group button { flex: 1; text-align: center; width: 50px; }
     }
 </style>

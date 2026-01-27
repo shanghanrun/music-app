@@ -80,11 +80,6 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
 </div>
 
 <style>
-    .nav-header {
-        padding: 10px 20px;
-        display: flex;
-        align-items: center;
-    }
 
     .back-link {
         display: inline-flex;
@@ -119,30 +114,26 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
     .movie-column{
         margin-top: 40px;
     }
-     /* 기본: 모바일 우선 (1열) */
+    /* 1. 기본 레이아웃 (모바일 우선 - Mobile First) */
     .app-layout {
-        display: grid;
-        grid-template-columns: 1fr; /* 모바일은 1열 고정 */
-        gap: 20px;
-        max-width: 980px;/* 1024에서 980으로 조정하여 여유 확보 */
+        display: flex;
+        flex-direction: column; /* 모바일에선 위아래로 배치 */
+        width: 100%;
+        max-width: 100vw; /* 브라우저 폭을 넘지 않게 고정 */
         margin: 0 auto;
-        padding: 10px;
+        padding: 10px; /* 모바일 좌우 여백 */
+        box-sizing: border-box; /* 패딩이 폭에 포함되도록 */
+        gap: 20px;
     }
-
-    /* 화면이 커졌을 때 (데스크톱 - 2칼럼) */
-   /* 모바일 전용 (화면 폭이 768px 이하일 때) */
+    /* 2. 데스크톱 대응 (화면 폭이 768px 이상일 때) */
     @media (min-width: 768px) { 
         .app-layout {
-            /* !important는 최후의 수단이지만, 테스트용으로 넣어보세요 */
-            grid-template-columns: 400px 1fr !important; 
-            display: grid !important;
+            display: grid;
+            /* 왼쪽 리스트(고정 400px) / 오른쪽 메인(나머지 1fr) */
+            grid-template-columns: 400px 1fr; 
             align-items: start;
-            max-width: 100%; /* 핸드폰에서는 꽉 차게 */
-            padding: 0 15px; /* 양옆에 아주 약간의 여백만 부여 */
-        }
-
-        .list-column {
-            min-width: 300px;
+            max-width: 1200px; /* 데스크톱에선 너무 퍼지지 않게 제한 */
+            padding: 20px;
         }
 
         .movie-column {
@@ -152,27 +143,38 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
         }
     }
 
-    /* 나중에 3칼럼 확장 시 */
+    /* 3. 울트라 와이드 대응 (화면 폭이 1600px 이상일 때) */
     @media (min-width: 1600px) {
         .app-layout {
-            /* 왼쪽(450px) / 중앙(1fr) / 오른쪽(가사 등 350px) */
-            grid-template-columns: 400px 1fr 350px; 
+            /* 3단 구성: 리스트(400px) / 메인(1fr) / 정보창(350px) */
+            grid-template-columns: 400px 1fr 350px;
+            max-width: 100%; /* 와이드 화면에선 넓게 사용 */
         }
     }
 
-    .mobile-player-area {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: white;
-        margin-bottom: 15px;
+    .nav-header {
+        padding: 5px 0; /* 모바일 폭 확보를 위해 패딩 축소 */
+        width: 100%;
+    }
+
+
+
+    /* 이미지/비디오가 박스를 뚫고 나가지 않게 강제 */
+    .mobile-player-area, .desktop-player-area {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
     }
 
     .desktop-player-area {
-        margin-bottom: 20px;
-        border-radius: 12px;
-        overflow: hidden;
         background: #000;
         aspect-ratio: 16 / 9;
+    }
+
+    /* 스크린샷에서 보인 리스트 아이템들이 꽉 차게 */
+    :global(.MusicCard) {
+        width: 100% !important;
+        box-sizing: border-box;
     }
 </style>
