@@ -87,7 +87,7 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
         gap: 8px;
         text-decoration: none;
         color: #6b7280; /* 너무 튀지 않는 차분한 회색 */
-        font-size: 0.9rem;
+        font-size: 1rem;
         font-weight: 500;
         transition: all 0.2s ease;
         padding: 6px 12px;

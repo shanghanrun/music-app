@@ -66,7 +66,7 @@
     .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
     .card-body { flex: 1; overflow: hidden; }
     .card-body .title { 
-        font-weight: 600; font-size: 0.95rem; color: #333;
+        font-weight: 600; font-size: 1rem; color: #333;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .card-body .meta { font-size: 0.8rem; color: #777; margin-top: 2px; }
