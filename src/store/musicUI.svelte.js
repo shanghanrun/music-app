@@ -1,11 +1,19 @@
-import { musicState, musicActions, reviewActions } from "$lib/pb.svelte"
+import { musicState, musicActions, reviewActions, statActions } from "$lib/pb.svelte"
 import { pb } from "$lib/pb.svelte"
 
 
 class MusicUI{
 	isMobile = $state(false)
 	// 나만의 통계: 사용자 방문 횟수 (로컬 스토리지 연동 권장)
-    visited = $state(0);
+    totalVisits = $state(0);
+
+	async updateGlobalVisits() {
+        const newCount = await statActions.incrementTotalVisits();
+        if (newCount) {
+            this.totalVisits = newCount;
+            console.log('🌍 전 세계 사용자 총 방문 횟수: ', this.totalVisits);
+        }
+    }
 
 	constructor(){
 		//클라이언트 사이드인 경우에만 리스너등록

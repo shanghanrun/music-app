@@ -21,6 +21,8 @@ import MusicTextInfo from "../component/MusicTextInfo.svelte";
         await musicUI.loadReviews()
 		musicUI.init(); // UI 초기화. 현재 곡 등
 
+        await musicUI.updateGlobalVisits(); // 접속할 때마다 DB 카운트 +1
+
 	}) 
 
     $effect(()=>{

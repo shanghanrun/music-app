@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { musicUI } from '../store/musicUI.svelte';
 	let { children } = $props()
+
+	console.log('totalVisits : ', musicUI.totalVisits)
 </script>
 
 <section class="popular-section">
@@ -10,6 +12,7 @@
 		<h3>인기 TOP 5</h3>
 		<button class="refresh-btn" onclick={() => musicActions.init()}>업데이트</button>
 		<button class="home-btn" onclick={() => goto('/')}>Home</button>
+		<span class="total-visits">총 방문자수 : {musicUI.totalVisits} 명</span>
 	</header>
 	<div class="top-list">
 		{@render children?.()}
@@ -33,19 +36,23 @@
 		border-radius: 8px;
 		border: none;
 		padding: 5px;
-		margin-right: 5px;
+		margin-right: 10px;
 	}
 	.home-btn{
 		background: rgb(25, 217, 25);
 		border-radius: 8px;
 		border: none;
-		padding: 5px;
+		padding: 6px;
 	}
 	.refresh-btn:hover{
 		background: rgb(61, 116, 244);
 	}
 	.home-btn:hover{
 		background: rgb(18, 166, 18);
+	}
+	.total-visits{
+		margin-left: 10px;
+		color: rgb(58, 58, 253)
 	}
 
 </style>

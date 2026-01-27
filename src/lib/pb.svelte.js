@@ -1,6 +1,7 @@
 import PocketBase from 'pocketbase';
 import { PUBLIC_PB_URL } from '$env/static/public'; 
 import { SvelteSet } from 'svelte/reactivity';
+import { musicUI } from '../store/musicUI.svelte';
 
 // console.log("📡 연결하려는 PB 주소:", PUBLIC_PB_URL);
 export const pb = new PocketBase(PUBLIC_PB_URL)
@@ -24,6 +25,8 @@ export const musicActions = {
             const records = await pb.collection('musics').getFullList({
                 sort: '-viewed',
             });
+            const record = await pb.collection('stats').getFirstListItem('name="total_visits"');
+            musicUI.totalVisits = record?.count
             
             // 가져온 데이터를 상태에 저장
             musicState.allMusics = records; 
@@ -146,4 +149,21 @@ export const reviewActions = {
             throw error;
         }
     }
+};
+
+export const statActions = {
+    // 전체 방문자 수 1 증가시키기
+    async incrementTotalVisits() {
+        try {
+            // 'total_visits'라는 이름을 가진 레코드를 찾음
+            const record = await pb.collection('stats').getFirstListItem('name="total_visits"');
+            await pb.collection('stats').update(record.id, {
+                count: (record.count || 0) + 1
+            });
+            return record.count + 1;
+        } catch (e) {
+            console.error("방문자 수 업데이트 실패:", e);
+        }
+    }
+    
 };
