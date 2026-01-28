@@ -32,7 +32,7 @@ class MusicUI{
 	sortKey = $state('viewed') // 사용자가 선택하는 값
 
 	// 실제 정렬에 사용 중인 상태 
-    currentSortKey = $state('viewed'); 
+    currentSortKey = $state('null'); 
     sortOrder = $state('desc'); 
 
 	// 노래선택, 재생관련 상태
@@ -144,22 +144,25 @@ class MusicUI{
 	//1. 검색어 + 정렬이 통합된 리스트 (ListView에서 사용)
 	get list() {
 		const term = this.searchTerm.toLowerCase();
+		// 일단 필터링만 수행.
 		let filtered = musicState.allMusics.filter(m => (
 			m.title.toLowerCase().includes(term) || m.singer.toLowerCase().includes(term)
 		));
 
-		// 기본 정렬 수행
-		filtered.sort((a, b) => {
-			const valA = String(a[this.currentSortKey]);
-			const valB = String(b[this.currentSortKey]);
-			return this.sortOrder === 'asc' 
-				? valA.localeCompare(valB, undefined, { numeric: true })
-				: valB.localeCompare(valA, undefined, { numeric: true });
-		});
+		// 2. ⭐️ [수정] currentSortKey가 있을 때만 정렬 수행
+		// 초기 로딩 시(null일 때)는 DB에서 가져온 원본 순서(또는 기본 순서)를 유지합니다.
+		if (this.currentSortKey) {
+			filtered.sort((a, b) => {
+				const valA = String(a[this.currentSortKey]);
+				const valB = String(b[this.currentSortKey]);
+				return this.sortOrder === 'asc' 
+					? valA.localeCompare(valB, undefined, { numeric: true })
+					: valB.localeCompare(valA, undefined, { numeric: true });
+			});
+		}
 
-		// ⭐️ [개정된 모바일 로직]
-		// 모바일이고 + 현재 곡이 있고 + '표준(standard)' 모드이거나 '수동 선택'일 때만 위로 올림
-		// '연속(linear)'이나 '셔플(shuffle)' 모드일 때는 정렬 순서 그대로 둬야 도돌이표가 안 생깁니다.
+		// 3. 모바일에서 현재 곡 상단 고정 로직
+		// 초기 로딩 시 불필요한 unshift를 막기 위해 isManualSelection 조건을 더 엄격히 봅니다.
 		if (this.isMobile && this.currentMusic && (this.playMode === 'standard' || this.isManualSelection)) {
 			const currentIndex = filtered.findIndex(m => m.id === this.currentMusic.id);
 			if (currentIndex > -1) {
@@ -172,13 +175,16 @@ class MusicUI{
 	}
 
 	// 정렬을 호출하는 함수. 
-	applySort(){
-		if (this.sortKey === this.currentSortKey){
-			// 정렬기준을 변경하지 않은 상태에서 (sort버튼을 반복누를 경우)
-			this.sortOrder = this.sortOrder === 'asc'? 'desc' : 'asc'
-		} else{ // 정렬기준을 바꾸고서, sort버튼을 누를 경우 
+	// 4. 정렬 버튼을 눌렀을 때만 비로소 정렬 키를 할당
+	applySort() {
+		if (!this.currentSortKey) {
 			this.currentSortKey = this.sortKey;
-			this.sortOrder = 'asc' // 새로운 키로 인한 정렬은 올림차순으로 정함
+			this.sortOrder = 'desc'; // 첫 정렬은 보통 내림차순(조회수 등)이 국룰
+		} else if (this.sortKey === this.currentSortKey) {
+			this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+		} else {
+			this.currentSortKey = this.sortKey;
+			this.sortOrder = 'desc';
 		}
 	}
 

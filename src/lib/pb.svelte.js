@@ -25,6 +25,14 @@ export const musicActions = {
             const records = await pb.collection('musics').getFullList({
                 sort: '-viewed',
             });
+
+            // 1. '첫 사랑'이 포함된 곡을 찾되, 없으면 첫 번째 곡을 가져오게 안전장치
+            const startMusic = records.find(r => r.title.includes('첫사랑')) || records[0];
+        
+            // 2. 배열(filter)이 아닌 '단일 객체'(find)를 할당해야 합니다.
+            musicUI.currentMusic = startMusic;
+
+
             const record = await pb.collection('stats').getFirstListItem('name="total_visits"');
             musicUI.totalVisits = record?.count
             

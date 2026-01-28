@@ -126,9 +126,9 @@ class MusicUI{
 			music.viewed = (music.viewed || 0) + 1;
 		}
 
-		if(this.isMobile){
-			this.scrollToTop();
-		}
+		// if(this.isMobile){
+		// 	this.scrollToTop();
+		// }
     }
 
 	// 플레이리스트의 카드에서, 선택하면 버튼에 의해서 currentMusic에 등록되는데, 플레이버튼을 누르면 플레이가 되고, 다시 한번 누르면 멈추게 하려면, isCurrent 여부가 중요하다.

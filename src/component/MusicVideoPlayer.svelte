@@ -29,8 +29,12 @@
 
     function initPlayer() {
         if (!musicUI.currentMusic || !playerContainer) return;
+        // 첫사랑 노래 url
+        const defaultUrl ='https://www.youtube.com/watch?v=3w5iMGSHvsE&list=RD3w5iMGSHvsE&start_radio=1'
+        const finalUrl = musicUI.currentMusic.src || defaultUrl;
         
-        const videoId = extractVideoId(musicUI.currentMusic.src);
+        const videoId = extractVideoId(finalUrl);
+        // const videoId = extractVideoId(musicUI.currentMusic.src);
         
         // window.YT 대신 window['YT']를 쓰면 에디터가 조용해집니다.
         player = new window['YT'].Player(playerContainer, {
@@ -39,8 +43,10 @@
             videoId: videoId,
             playerVars: {
                 'autoplay':  1 ,
+                // 'mute': 1, //모바일에서는 음소거로 시작하면 성공률 높다.
                 'controls': 1,
-                'origin': window.location.origin // 보안 및 도메인 허용 설정
+                'origin': window.location.origin, // 보안 및 도메인 허용 설정
+                'playsinline': 1 // 👈 모바일 브라우저에서 전체화면 안 튕기게 해주는 필수 옵션!
             },
             events: {
                 'onReady':(event)=>{
