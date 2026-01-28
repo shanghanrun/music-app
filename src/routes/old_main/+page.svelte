@@ -1,282 +1,179 @@
 <script>
-    import { musicState, musicActions } from '$lib/pb.svelte.js';
-    import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
+import { musicUI } from "../store/musicUI.svelte"; 
+import { musicActions } from "$lib/pb.svelte"; 
+import { onMount } from 'svelte';
 
-    let searchTerm = $state('');
-    let currentMusic = $state(null);
-    let isPlaying = $state(false); 
-    let lastViewTime = 0; 
+import MusicListView from "../component/MusicListView.svelte";
+import MusicCard from "../component/MusicCard.svelte";
+import MusicVideoPlayer from "../component/MusicVideoPlayer.svelte";
+import RelatedMusicContainer from "../component/RelatedMusicContainer.svelte";
 
-    onMount(async () => {
-        await musicActions.init();
-        if (musicState.allMusics.length > 0) {
-            currentMusic = musicState.allMusics[0];
+import RelatedMusicListView from "../component/RelatedMusicListView.svelte";
+import RelatedMusicCard from "../component/RelatedMusicCard.svelte";
+import MusicInfo from "../component/MusicInfo.svelte";
+import MusicTextInfo from "../component/MusicTextInfo.svelte";
+  import GuestBook from "../component/GuestBook.svelte";
+
+
+	// 1. 페이지가 열리면 서버에서 데이터를 싹 긁어와서 musicState.allMusics를 채웁니다.
+	onMount(async ()=> {
+		await musicActions.init(); // 데이터 먼저 로드
+        await musicUI.loadReviews()
+		musicUI.init(); // UI 초기화. 현재 곡 등
+
+        await musicUI.updateGlobalVisits(); // 접속할 때마다 DB 카운트 +1
+
+	}) 
+
+    $effect(()=>{
+        // if(musicUI.reviews.length > 0){
+        //     musicUI.loadReviews()
+        // }
+        if(musicUI.reviewTrigger> -1){
+            musicUI.loadReviews()
         }
-        console.log(currentMusic)
-    });
-
-    // 재생 및 곡 선택 통합 핸들러
-    async function handlePlay(music) {
-        const now = Date.now();
-
-        if (currentMusic?.id === music.id) {
-            // 같은 곡 클릭 시 재생/일시정지만 토글
-            isPlaying = !isPlaying;
-        } else {
-            // 다른 곡 클릭 시 곡 변경 및 재생 시작
-            currentMusic = music;
-            isPlaying = true;
-
-            // 조회수 증가 (3초 디바운스)
-            if (now - lastViewTime > 3000) {
-                lastViewTime = now;
-                await musicActions.updateMusic(music.id, { 
-                    viewed: (music.viewed || 0) + 1 
-                });
-                music.viewed = (music.viewed || 0) + 1;
-            }
-        }
-    }
-
-    let filteredMusics = $derived(
-        musicState.allMusics.filter(m => 
-            m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            m.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            m.singer.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
-
-    let relatedMusics = $derived(
-        musicState.allMusics
-            .filter(m => currentMusic && m.theme === currentMusic.theme && m.id !== currentMusic.id)
-            .slice(0, 6)
-    );
-
-    function getEmbedUrl(url, play) {
-        if (!url) return '';
-        const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
-        const params = play ? `?autoplay=1&mute=0&enablejsapi=1` : '';
-        return `https://www.youtube.com/embed/${videoId}${params}`;
-    }
+    })
 </script>
 
-<div class="user-container">
-    <section class="col list-col">
-        <header>
-            <h3>Music List <span class="count-badge">{filteredMusics.length}</span></h3>
-            <div class="search-wrapper">
-                <input type="text" class="search-bar" bind:value={searchTerm} placeholder="검색..." />
-            </div>
-        </header>
-        <div class="card-container">
-            {#each filteredMusics as music (music.id)}
-                <button class="music-card-item" 
-                        class:active={currentMusic?.id === music.id}
-                        onclick={() => handlePlay(music)}>
-                    
-                    <div class="img-wrapper">
-                        <img src={music.image ? `https://chois.cloud/api/files/musics/${music.id}/${music.image}` : music.thumbUrl} alt="" />
-                    </div>
-
-                    <div class="card-body">
-                        <div class="title">{music.title} : {music.singer}</div>
-                        <div class="meta">{music.genre} · 👁️ {music.viewed || 0}</div>
-                    </div>
-
-                    <div class="play-control-btn">
-                        {#if currentMusic?.id === music.id && isPlaying}
-                            <span class="icon">⏸️</span>
-                        {:else}
-                            <span class="icon">▶️</span>
-                        {/if}
-                    </div>
-                </button>
-            {/each}
+<div class="app-layout">
+    <div class="column list-column">
+        <div class="nav-header">
+            <a href="https://hani.chois.cloud" class="back-link">
+                <span class="icon">&larr;</span> 
+                <span class="text">문서 작업으로 돌아가기</span>
+            </a>
         </div>
-    </section>
+        <!-- <a href="https://hani.chois.cloud" class="doc"> 문서작업으로 돌아가기 </a> -->
+        <MusicListView>
+            {#if musicUI.isMobile}
+                <div class="mobile-player-area">
+                    <MusicVideoPlayer />
+                </div>
+            {/if}
+            
+            {#each musicUI.list as music (music.id)}
+                <MusicCard item={music} />
+            {/each}
+        </MusicListView>
+    </div>
 
-    <section class="col main-col">
-        {#if currentMusic}
-            <div class="player-container">
-                <div class="player-ratio">
-                    {#if isPlaying}
-                        <iframe 
-                            src={getEmbedUrl(currentMusic.src, true)} 
-                            title="player" 
-                            allow="autoplay; encrypted-media" 
-                            allowfullscreen>
-                        </iframe>
-                    {:else}
-                        <div class="player-placeholder">
-                            <img src={currentMusic.image ? `https://chois.cloud/api/files/musics/${currentMusic.id}/${currentMusic.image}` : currentMusic.thumbUrl} alt="" />
-                        </div>
-                    {/if}
-                </div>
-            </div>
-            <div class="main-info">
-                <h2>
-                    <span>{currentMusic.title}</span>
-                    <span class="singer-name"> : {currentMusic.singer}</span>
-                </h2>
-                <div class="tags">
-                    <span>#{currentMusic.genre}</span>
-                    <span>#{currentMusic.theme}</span>
-                </div>
-                <div class="recommend-section">
-                    <h4>Similar Theme: {currentMusic.theme}</h4>
-                    <div class="recommend-grid">
-                        {#each relatedMusics as rm}
-                            <button class="rec-item" onclick={() => handlePlay(rm)}>
-                                <img src={rm.image ? `https://chois.cloud/api/files/musics/${rm.id}/${rm.image}` : rm.thumbUrl} alt="" />
-                                <span>{rm.title}</span>
-                            </button>
-                        {/each}
-                    </div>
-                </div>
+    <div class="column movie-column">
+        {#if !musicUI.isMobile}
+            <div class="desktop-player-area">
+                <MusicVideoPlayer />
             </div>
         {/if}
-    </section>
 
-    <section class="col detail-col">
-        {#if currentMusic}
-            <div class="detail-header">
-                <h3>Lyrics & Notes</h3>
-                <button onclick={()=> goto('/admin')}>Admin 페이지</button>
-            </div>
-            <div class="scroll-content">
-                <div class="lyric-section">
-                    <label>Original</label>
-                    <pre>{currentMusic.lyric || '가사 없음'}</pre>
-                </div>
-                <div class="lyric-section">
-                    <label>Translation</label>
-                    <pre>{currentMusic.koLyric || '번역 없음'}</pre>
-                </div>
-                {#if currentMusic.etc}
-                    <div class="etc-section">
-                        <label>Admin's Note</label>
-                        <div class="etc-content">{currentMusic.etc}</div>
-                    </div>
-                {/if}
-            </div>
-        {/if}
-    </section>
+        <RelatedMusicContainer>
+            <RelatedMusicListView>
+                {#each musicUI.relatedMusics as rm (rm.id)}
+                    <RelatedMusicCard item={rm} />
+                {/each}
+            </RelatedMusicListView>
+        </RelatedMusicContainer>
+
+        <GuestBook />
+    </div>
+    <div class="column info-column">
+        <MusicInfo>
+            <MusicTextInfo />
+        </MusicInfo>
+    </div>    
 </div>
 
 <style>
-    .user-container { 
-        display: grid; 
-        grid-template-columns: 1.5fr 2fr 2fr; 
-        gap: 16px; padding: 16px; height: 100vh; 
-        background: #f0f2f5; box-sizing: border-box;
-    }
 
-    section.col { 
-        background: white; border-radius: 12px; 
-        display: flex; flex-direction: column; overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    /* 좌측 검색 및 목록 스타일 */
-    .list-col { padding: 16px; }
-    .search-wrapper { width: 100%; box-sizing: border-box; padding-top: 8px; }
-    .search-bar { 
-        width: 100%; padding: 10px; border-radius: 6px; 
-        border: 1px solid #ddd; box-sizing: border-box;
-    }
-    .card-container { flex: 1; overflow-y: auto; margin-top: 10px; }
-
-    /* 음악 카드 스타일 (버튼화 및 정렬) */
-    .music-card-item {
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between; /* 이미지 - 텍스트 - 버튼 간격 띄움 */
-        gap: 15px; 
-        padding: 12px;
-        margin-bottom: 10px;
-        background: #f9f9f9; 
-        border-radius: 12px; 
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: #6b7280; /* 너무 튀지 않는 차분한 회색 */
+        font-size: 1rem;
+        font-weight: 500;
         transition: all 0.2s ease;
-        border: 1px solid transparent;
+        padding: 6px 12px;
+        border-radius: 20px; /* 알약 모양 */
+        background: #f3f4f6; /* 연한 배경색 */
+    }
+
+    .back-link:hover {
+        color: #3b82f6; /* 호버 시 파란색으로 포인트 */
+        background: #eff6ff;
+        transform: translateX(-4px); /* 왼쪽으로 살짝 움직이는 애니메이션 */
+    }
+
+    .back-link .icon {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    .doc{
+        margin-left: 233px;
+        background: rgb(118, 255, 6);
+        margin-bottom: 5px;
+        padding: 3px;
+    }
+    .movie-column{
+        margin-top: 40px;
+    }
+    /* 1. 기본 레이아웃 (모바일 우선 - Mobile First) */
+    .app-layout {
+        display: flex;
+        flex-direction: column; /* 모바일에선 위아래로 배치 */
         width: 100%;
-        cursor: pointer;
-        text-align: left;
+        max-width: 100vw; /* 브라우저 폭을 넘지 않게 고정 */
+        margin: 0 auto;
+        padding: 2px; /* 모바일 좌우 여백 */
+        box-sizing: border-box; /* 패딩이 폭에 포함되도록 */
+        gap: 20px;
+    }
+    /* 2. 데스크톱 대응 (화면 폭이 768px 이상일 때) */
+    @media (min-width: 768px) { 
+        .app-layout {
+            display: grid;
+            /* 왼쪽 리스트(고정 400px) / 오른쪽 메인(나머지 1fr) */
+            grid-template-columns: 400px 1fr; 
+            align-items: start;
+            max-width: 1200px; /* 데스크톱에선 너무 퍼지지 않게 제한 */
+            padding: 2px;
+        }
+
+        .movie-column {
+            position: sticky;
+            top: 20px;
+            width: 100%;
+        }
     }
 
-    .music-card-item:hover { background: #f0f0f0; }
-    .music-card-item.active { 
-        background: #e8f5e9; 
-        border-color: #4caf50; 
-        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+    /* 3. 울트라 와이드 대응 (화면 폭이 1600px 이상일 때) */
+    @media (min-width: 1600px) {
+        .app-layout {
+            /* 3단 구성: 리스트(400px) / 메인(1fr) / 정보창(350px) */
+            grid-template-columns: 400px 1fr 350px;
+            max-width: 100%; /* 와이드 화면에선 넓게 사용 */
+        }
     }
 
-    .img-wrapper { 
-        flex-shrink: 0;
-        width: 50px; height: 50px; 
-        border-radius: 8px; overflow: hidden; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    .nav-header {
+        padding: 5px 0; /* 모바일 폭 확보를 위해 패딩 축소 */
+        width: 100%;
     }
-    .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-    .card-body { 
-        flex: 1; /* 중간 공간을 꽉 채워서 양옆 요소를 밀어냄 */
+
+
+    .mobile-player-area {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: white;
+        margin-bottom: 15px;
+    }
+
+    .desktop-player-area {
+        margin-bottom: 20px;
+        border-radius: 12px;
         overflow: hidden;
+        background: #000;
+        aspect-ratio: 16 / 9;
     }
-    .card-body .title { 
-        font-weight: 600; font-size: 0.95rem; color: #333;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .card-body .meta { font-size: 0.8rem; color: #777; margin-top: 2px; }
-
-    .play-control-btn {
-        flex-shrink: 0;
-        background: white; border: 1px solid #ddd; 
-        width: 36px; height: 36px;
-        border-radius: 50%; display: flex; 
-        align-items: center; justify-content: center;
-        font-size: 0.8rem;
-    }
-
-    /* 중앙 플레이어 스타일 */
-    .player-container { width: 100%; background: #000; }
-    .player-ratio { position: relative; width: 100%; padding-top: 56.25%; }
-    .player-ratio iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-    .player-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; }
-    .player-placeholder img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
-
-    .main-info { padding: 20px; overflow-y: auto; }
-    .singer-name { font-weight: normal; color: #666; font-size: 1.2rem; }
-    .tags { margin: 10px 0; color: #4caf50; font-weight: 600; font-size: 0.9rem; }
-    
-    .recommend-section { margin-top: 24px; }
-    .recommend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-    .rec-item { border: none; background: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; text-align: left; }
-    .rec-item img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; }
-    .rec-item span { font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* 우측 가사/노트 스타일 (세로 1/4 고정) */
-    .detail-header { padding: 16px; border-bottom: 1px solid #eee; }
-    .scroll-content { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 20px; }
-    .lyric-section, .etc-section { display: flex; flex-direction: column; }
-    .lyric-section label, .etc-section label { 
-        display: block; font-size: 0.75rem; color: #888; 
-        text-transform: uppercase; margin-bottom: 6px; font-weight: bold;
-    }
-    pre, .etc-content { 
-        height: 22vh; overflow-y: auto; 
-        background: #f8f9fa; padding: 15px; 
-        border-radius: 8px; margin: 0;
-        white-space: pre-wrap; font-family: inherit; 
-        font-size: 0.95rem; line-height: 1.6; border: 1px solid #eee;
-    }
-    .etc-content { background: #fffdf0; border-color: #f0e68c; }
-
-    /* 스크롤바 커스텀 */
-    pre::-webkit-scrollbar, .etc-content::-webkit-scrollbar, .card-container::-webkit-scrollbar { width: 6px; }
-    pre::-webkit-scrollbar-thumb, .etc-content::-webkit-scrollbar-thumb, .card-container::-webkit-scrollbar-thumb { 
-        background: #ddd; border-radius: 10px; 
-    }
-
-    .count-badge { background: #4caf50; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
 </style>
