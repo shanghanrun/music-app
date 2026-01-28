@@ -32,7 +32,7 @@ class MusicUI{
 	sortKey = $state('viewed') // 사용자가 선택하는 값
 
 	// 실제 정렬에 사용 중인 상태 
-    currentSortKey = $state('null'); 
+    currentSortKey = $state('viewed'); 
     sortOrder = $state('desc'); 
 
 	// 노래선택, 재생관련 상태
@@ -49,7 +49,7 @@ class MusicUI{
 	reviewTrigger = $state(0)
 
 
-	// 1. 다음 곡 재생 로직 (연속재생용.유튜브 Player API의 onEnded 이벤트 등에서 호출)
+	// 1. 다음 곡 재생 로직 (유튜브 Player API의 onEnded 이벤트 등에서 호출)
     playNext = async () => {
         if (this.list.length === 0 || !this.currentMusic) return;
 
@@ -66,27 +66,29 @@ class MusicUI{
 
 		// 현재 곡의 '고유 ID'를 기준으로 인덱스를 찾습니다.
 		const currentIndex = this.list.findIndex(m => m.id === this.currentMusic.id);
-		let nextIndex;
+		let nextIndex = currentIndex + 1;
 
 		if (this.playMode === 'shuffle') {
 			// ⭐️ 셔플 모드: 현재 곡 제외하고 무작위 선택
-				do {
-				nextIndex = Math.floor(Math.random() * this.list.length);
-			} while (this.list.length > 1 && nextIndex === currentIndex);
-			
+			let randomIndex;
+			do {
+				randomIndex = Math.floor(Math.random() * this.list.length);
+			} while (this.list.length > 1 && randomIndex === currentIndex);
+			nextIndex = randomIndex;
 		} else {
 			// ⭐️ 연속(linear) 모드: 다음 곡으로, 끝이면 처음으로
-			nextIndex = (currentIndex + 1) % this.list.length;
+			nextIndex = currentIndex + 1;
+			if (nextIndex >= this.list.length) nextIndex = 0;
 		}
 
 		const nextMusic = this.list[nextIndex];
         
         if (nextMusic) {
             this.currentMusic = nextMusic; // 현재 곡 교체
-            // ⭐️ 중요: 이미 한 번 재생을 시작한 이후이므로 여기서는 true를 유지하여 계속 흘러가게 함
-            this.isPlaying = true; 
-            await musicActions.incrementView(nextMusic.id);
-            nextMusic.viewed = (nextMusic.viewed || 0) + 1;
+            this.isPlaying = true;
+            
+            // ⭐️ 시스템 자동 재생 함수 호출 (스크롤 안 함)
+            this.autoHandlePlay(nextMusic);
         }
     }
 
@@ -105,7 +107,7 @@ class MusicUI{
 		await musicActions.incrementView(music.id)
     }
 
-    // 3. 수동 클릭 핸들러 (사용자가 직접 버튼을 누르는 순간)
+    // 3. 기존 handlePlay 수정 (사용자가 직접 클릭했을 때)
     handlePlay = async (music) => {
 		this.isManualSelection = true; // 수동 선택임을 명시
 
@@ -116,7 +118,7 @@ class MusicUI{
 		// 2. 다른 곡을 눌렀을 때: 곡 변경 및 무조건 재생
 		else {
 			this.currentMusic = music;
-			this.isPlaying = true; // 여기서 true가 되면서 iframe 이 로드됨
+			this.isPlaying = true;
 
 			// 조회수 증가 (DB업데이트)
 			await musicActions.incrementView(music.id);
@@ -144,25 +146,22 @@ class MusicUI{
 	//1. 검색어 + 정렬이 통합된 리스트 (ListView에서 사용)
 	get list() {
 		const term = this.searchTerm.toLowerCase();
-		// 일단 필터링만 수행.
 		let filtered = musicState.allMusics.filter(m => (
 			m.title.toLowerCase().includes(term) || m.singer.toLowerCase().includes(term)
 		));
 
-		// 2. ⭐️ [수정] currentSortKey가 있을 때만 정렬 수행
-		// 초기 로딩 시(null일 때)는 DB에서 가져온 원본 순서(또는 기본 순서)를 유지합니다.
-		if (this.currentSortKey) {
-			filtered.sort((a, b) => {
-				const valA = String(a[this.currentSortKey]);
-				const valB = String(b[this.currentSortKey]);
-				return this.sortOrder === 'asc' 
-					? valA.localeCompare(valB, undefined, { numeric: true })
-					: valB.localeCompare(valA, undefined, { numeric: true });
-			});
-		}
+		// 기본 정렬 수행
+		filtered.sort((a, b) => {
+			const valA = String(a[this.currentSortKey]);
+			const valB = String(b[this.currentSortKey]);
+			return this.sortOrder === 'asc' 
+				? valA.localeCompare(valB, undefined, { numeric: true })
+				: valB.localeCompare(valA, undefined, { numeric: true });
+		});
 
-		// 3. 모바일에서 현재 곡 상단 고정 로직
-		// 초기 로딩 시 불필요한 unshift를 막기 위해 isManualSelection 조건을 더 엄격히 봅니다.
+		// ⭐️ [개정된 모바일 로직]
+		// 모바일이고 + 현재 곡이 있고 + '표준(standard)' 모드이거나 '수동 선택'일 때만 위로 올림
+		// '연속(linear)'이나 '셔플(shuffle)' 모드일 때는 정렬 순서 그대로 둬야 도돌이표가 안 생깁니다.
 		if (this.isMobile && this.currentMusic && (this.playMode === 'standard' || this.isManualSelection)) {
 			const currentIndex = filtered.findIndex(m => m.id === this.currentMusic.id);
 			if (currentIndex > -1) {
@@ -175,16 +174,13 @@ class MusicUI{
 	}
 
 	// 정렬을 호출하는 함수. 
-	// 4. 정렬 버튼을 눌렀을 때만 비로소 정렬 키를 할당
-	applySort() {
-		if (!this.currentSortKey) {
+	applySort(){
+		if (this.sortKey === this.currentSortKey){
+			// 정렬기준을 변경하지 않은 상태에서 (sort버튼을 반복누를 경우)
+			this.sortOrder = this.sortOrder === 'asc'? 'desc' : 'asc'
+		} else{ // 정렬기준을 바꾸고서, sort버튼을 누를 경우 
 			this.currentSortKey = this.sortKey;
-			this.sortOrder = 'desc'; // 첫 정렬은 보통 내림차순(조회수 등)이 국룰
-		} else if (this.sortKey === this.currentSortKey) {
-			this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-		} else {
-			this.currentSortKey = this.sortKey;
-			this.sortOrder = 'desc';
+			this.sortOrder = 'asc' // 새로운 키로 인한 정렬은 올림차순으로 정함
 		}
 	}
 
@@ -230,29 +226,39 @@ class MusicUI{
 	get videoUrl() {
 		if (!this.currentMusic || !this.currentMusic.src) return "";
 		
-		// 이미 DB에 https://www.youtube.com/embed/ID 형태로 들어있음
-		const baseEmbedUrl = this.currentMusic.src;
-
-		// isPlaying이 true일 때만 autoplay=1을 붙여서 '플레이어'가 로드되자마자 재생되게 함
-		// enablejsapi=1은 나중에 영상 종료 감지 등을 위해 넣어두는 것이 좋습니다.
-		if (this.isPlaying) {
-			return `${baseEmbedUrl}?autoplay=1&mute=0&enablejsapi=1`;
-		}
+		let src = this.currentMusic.src;
 		
-		return baseEmbedUrl;
+		// 1. 이미 embed 주소인 경우 그대로 반환
+		if (src.includes('youtube.com/embed/')) return src;
+		//보안을 위해 밖에서 embed없는 주소로 오면 브라우저에서 막힘.
+
+		// 2. 일반 youtube.com/watch?v=... 주소인 경우 변환
+		if (src.includes('watch?v=')) {
+			const videoId = src.split('v=')[1]?.split('&')[0];
+			return `https://www.youtube.com/embed/${videoId}`;
+		}
+
+		// 3. youtube.be/... (단축 주소)인 경우 변환
+		if (src.includes('youtu.be/')) {
+			const videoId = src.split('youtu.be/')[1]?.split('?')[0];
+			return `https://www.youtube.com/embed/${videoId}`;
+		}
+
+		// 변환할 수 없는 경우 원본 반환 (혹은 에러 처리)
+		return src;
 	}
 
 	// 6. 데이터베이스에서 데이터 불러온 이후 초기화 및 유틸리티
     async init() {
         this.searchTerm = '';
         this.selectedIds = new Set();
-        this.isPlaying = false; // 초기에는 정지 상태로 시작(유투브 정책 대응 자동재생방지)
+        this.isPlaying = false; // 초기에는 정지 상태로 시작(유투브 정책 대응)
 		this.playMode ='linear'
         // 첫 번째 곡을 기본 선택값으로 잡고 싶다면 musicActions.init() 이후에 실행
         if (musicState.allMusics.length > 0) {
-        // 2. 곡 정보만 담아두고, 플레이어는 멈춤 상태(placeholder 표시)로 대기
+        // 첫 곡을 명시적으로 할당
         this.currentMusic = musicState.allMusics[0];
-        // console.log("초기 곡 설정 완료(대기상태):", this.currentMusic.title);
+        // console.log("초기 곡 설정 완료:", this.currentMusic.title);
     }
     }
 
