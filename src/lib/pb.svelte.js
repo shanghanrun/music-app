@@ -115,9 +115,12 @@ export const musicActions = {
 		try {
             console.log('viewed 증가 로직 시작')
 			// 유저에게 알리지 않고 백그라운드에서 실행
-			const record = await pb.collection('musics').update(musicId, {
-				'viewed+': 1  // 기존 값에서 1을 더해주는 PocketBase 문법
-			});
+			// 기존 update 호출 부분에 { requestKey: null } 옵션을 추가합니다.
+            await pb.collection('musics').update(id, {
+                'viewed+': 1  // 조회수 1 증가 (PocketBase 필드 연산 기능)
+            }, { 
+                requestKey: null // 자동 취소를 비활성화하여 모든 요청을 처리함
+            })
 			
 			// 로컬 상태(musicState)만 살짝 업데이트해서 우측 통계에 즉시 반영
 			const index = musicState.allMusics.findIndex(m => m.id === musicId);
