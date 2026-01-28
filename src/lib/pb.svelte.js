@@ -31,7 +31,7 @@ export const musicActions = {
             // 가져온 데이터를 상태에 저장
             musicState.allMusics = records; 
             console.log("🎵 데이터 로드 완료:", records.length, "개의 곡");
-            console.log(musicState.allMusics)
+            // console.log(musicState.allMusics)
         } catch (err) {
             console.error("❌ 데이터 불러오기 실패:", err);
         }
@@ -46,7 +46,7 @@ export const musicActions = {
             // 로컬 상태(UI)에 즉시 반영
             musicState.allMusics = [...musicState.allMusics, record];
             
-            console.log("✅ 새 음악이 추가되었습니다:", record.title);
+            // console.log("✅ 새 음악이 추가되었습니다:", record.title);
             return record;
         } catch (err) {
             console.error("❌ 음악 추가 실패:", err);
@@ -65,7 +65,7 @@ export const musicActions = {
                 m.id === id ? record : m
             );
             
-            console.log("✅ 음악 정보가 수정되었습니다:", record.title);
+            // console.log("✅ 음악 정보가 수정되었습니다:", record.title);
             return record;
         } catch (err) {
             console.error("❌ 음악 수정 실패:", err);
@@ -87,7 +87,7 @@ export const musicActions = {
             // 만약 현재 재생 중인 곡이 삭제된 곡이라면 첫 번째 곡으로 변경
             // (selectedMusic은 컴포넌트 레벨에서 관리하므로 컴포넌트 로직에서 처리 권장)
             
-            console.log("✅ 음악이 삭제되었습니다. ID:", id);
+            // console.log("✅ 음악이 삭제되었습니다. ID:", id);
         } catch (err) {
             console.error("❌ 음악 삭제 실패:", err);
             throw err;
@@ -113,7 +113,7 @@ export const musicActions = {
     },
 	async incrementView(musicId) {
 		try {
-            console.log('viewed 증가 로직 시작')
+            // console.log('viewed 증가 로직 시작')
 			// 유저에게 알리지 않고 백그라운드에서 실행
 			// 기존 update 호출 부분에 { requestKey: null } 옵션을 추가합니다.
             await pb.collection('musics').update(id, {
@@ -126,7 +126,7 @@ export const musicActions = {
 			const index = musicState.allMusics.findIndex(m => m.id === musicId);
 			if (index !== -1) {
 				musicState.allMusics[index].viewed = record.viewed;
-                console.log('viewed가 증가했습니다.')
+                // console.log('viewed가 증가했습니다.')
 			}
 		} catch (err) {
 			// 사용자에게 경고창을 띄우지 않고 콘솔에만 기록 (사용자 경험 방해 금지)

@@ -53,7 +53,7 @@ async function upload() {
             await pb.collection('musics').create(formData);
             console.log(`✅ 업로드 완료: ${item.title}`);
         }
-        console.log("🚀 모든 음악 데이터와 이미지가 서버에 저장되었습니다!");
+        // console.log("🚀 모든 음악 데이터와 이미지가 서버에 저장되었습니다!");
     } catch (error) {
         console.error("❌ 상세 에러 정보:");
         console.error("상태 코드:", error.status);

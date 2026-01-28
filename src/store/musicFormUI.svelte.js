@@ -64,7 +64,7 @@ class MusicFormUI{
 	// 저장(등록/수정) 처리
     handleSave=async()=> {
         const formData = new FormData();
-        console.log('현재 편집중인 폼: ', this.form)
+        // console.log('현재 편집중인 폼: ', this.form)
        
         Object.keys(this.form).forEach(key => {
             if (key === 'image') {
@@ -78,7 +78,7 @@ class MusicFormUI{
             }
         });
 
-        console.log('forEach를 거친 후의 폼: ', formData)
+        // console.log('forEach를 거친 후의 폼: ', formData)
 
         // 제대로 된 데이터가 안 들어왔을 경우 취소
         // [수정 포인트] FormData의 값은 .get()으로 가져와야 합니다.
@@ -89,7 +89,7 @@ class MusicFormUI{
         if (!title || !singer) {
             console.error('저장에러: 제목과 가수는 필수입니다.');
             // 실제 데이터 확인용 로그
-            console.log('실제 들어간 데이터 확인:', Array.from(formData.entries())); 
+            // console.log('실제 들어간 데이터 확인:', Array.from(formData.entries())); 
             return;
         }
        

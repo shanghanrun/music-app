@@ -123,7 +123,7 @@ function transferText2Data(rawText) {
 }
 
 let result = transferText2Data(rawText);
-console.log(result)
+// console.log(result)
 
 
 // 유튜브 URL에서 ID만 뽑아내는 함수

@@ -4,7 +4,7 @@
 	import { musicUI } from '../store/musicUI.svelte';
 	let { children } = $props()
 
-	console.log('totalVisits : ', musicUI.totalVisits)
+	// console.log('totalVisits : ', musicUI.totalVisits)
 </script>
 
 <section class="popular-section">

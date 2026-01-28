@@ -57,7 +57,7 @@
     function onPlayerStateChange(event) {
         // event.data === 0 (종료됨)
         if (event.data === 0) {
-            console.log("곡 종료 감지 - 다음 곡으로 강제 이동");
+            // console.log("곡 종료 감지 - 다음 곡으로 강제 이동");
             // ⭐️ 여기서 currentMusic이 바뀌면 아래 $effect가 실행됩니다.
             musicUI.playNext(); 
         }

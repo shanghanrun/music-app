@@ -11,7 +11,7 @@ class MusicUI{
         const newCount = await statActions.incrementTotalVisits();
         if (newCount) {
             this.totalVisits = newCount;
-            console.log('🌍 전 세계 사용자 총 방문 횟수: ', this.totalVisits);
+            // console.log('🌍 전 세계 사용자 총 방문 횟수: ', this.totalVisits);
         }
     }
 
@@ -55,7 +55,7 @@ class MusicUI{
 
 		// 1. 표준 모드일 때 처리
 		if (this.playMode === 'standard') {
-			console.log("표준 모드: 한 곡 재생 완료 후 정지");
+			// console.log("표준 모드: 한 곡 재생 완료 후 정지");
 			this.isPlaying = false; // 재생 중지 (한 곡 반복을 원하시면 다시 playVideo 호출)
 			this.isManualSelection = true; // 상단 고정 유지
 			return;
@@ -258,7 +258,7 @@ class MusicUI{
         if (musicState.allMusics.length > 0) {
         // 첫 곡을 명시적으로 할당
         this.currentMusic = musicState.allMusics[0];
-        console.log("초기 곡 설정 완료:", this.currentMusic.title);
+        // console.log("초기 곡 설정 완료:", this.currentMusic.title);
     }
     }
 
@@ -273,7 +273,7 @@ class MusicUI{
         }
 
         try {
-			console.log('리뷰 글: ', this.reviewText)
+			// console.log('리뷰 글: ', this.reviewText)
             const newReview = await reviewActions.addReview(this.reviewText);
             // 목록 맨 앞에 방금 쓴 리뷰 추가 (새로고침 없이 바로 보이게!)
             this.reviews = [newReview, ...this.reviews];
@@ -294,7 +294,7 @@ class MusicUI{
                 filter: 'isDeleted = false',
                 sort: '-created', // 최신글이 위로
             });
-			console.log('reviews : ', this.reviews)
+			// console.log('reviews : ', this.reviews)
         } catch (e) {
             console.error("리뷰 로드 실패:", e);
         }

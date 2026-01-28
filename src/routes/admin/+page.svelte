@@ -13,9 +13,9 @@ import BatchForm from '../../component/BatchForm.svelte';
 		await musicActions.init(); // 데이터 먼저 로드
 		musicUI.init(); // UI 초기화. 현재 곡 등		
 	}) 
-    console.log('top viewed', musicUI.topViewed)
-    console.log('top viewed', musicUI.topViewed[0])
-    console.log('top viewed', musicUI.topViewed[0]?.title)
+    // console.log('top viewed', musicUI.topViewed)
+    // console.log('top viewed', musicUI.topViewed[0])
+    // console.log('top viewed', musicUI.topViewed[0]?.title)
 
 </script>
 
