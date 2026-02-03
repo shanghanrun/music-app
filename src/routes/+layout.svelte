@@ -2,6 +2,8 @@
     import { page } from '$app/state';
     import favicon from '$lib/assets/favicon.svg';
 
+    export const prerender = true;
+    export const trailingSlash = 'always';
     // [이식 가이드] 특정 프로젝트의 상태 관리 객체가 있다면 여기에 임포트하세요.
     // import { bookWork } from '$lib/BookWork.svelte'; 
 
