@@ -42,8 +42,8 @@
             width: '100%',
             videoId: videoId,
             playerVars: {
-                'autoplay':  1 ,
-                // 'mute': 1, //모바일에서는 음소거로 시작하면 성공률 높다.
+                'autoplay':  0 ,
+                'mute': 1, //모바일에서는 음소거로 시작하면 성공률 높다.
                 'controls': 1,
                 'origin': window.location.origin, // 보안 및 도메인 허용 설정
                 'playsinline': 1 // 👈 모바일 브라우저에서 전체화면 안 튕기게 해주는 필수 옵션!
@@ -51,9 +51,9 @@
             events: {
                 'onReady':(event)=>{
                     //플레이어가 준비되면 바로 재생 시도
-                    if(musicUI.isPlaying){
-                        event.target.playVideo()
-                    }
+                    // if(musicUI.isPlaying){  아무것도 안해야 된다.
+                    //     event.target.playVideo()
+                    // }
                 },
                 'onStateChange': onPlayerStateChange
             }
@@ -79,25 +79,21 @@
     $effect(() => {
         // 1. currentMusic이 바뀔 때마다 실행됨을 보장
         const targetMusic = musicUI.currentMusic;
-        if (!targetMusic || !player || !player.loadVideoById) return;
+        if (!targetMusic || !player ) return;
 
         const videoId = extractVideoId(targetMusic.src);
         
         // 2. 현재 플레이어 상태 확인
         // cueVideoById는 대기, loadVideoById는 즉시 재생 시도입니다.
         try {
-            player.loadVideoById({
-                videoId: videoId,
-                startSeconds: 0,
-                suggestedQuality: 'default'
-            });
+            player.cueVideoById(videoId);
             
-            // 3. 브라우저 정책 대응: 약간의 시차를 두고 재생 명령
-            setTimeout(() => {
-                if (musicUI.isPlaying) {
-                    player.playVideo();
-                }
-            }, 100); 
+            // // 3. 브라우저 정책 대응: 약간의 시차를 두고 재생 명령
+            // setTimeout(() => {
+            //     if (musicUI.isPlaying) {
+            //         player.playVideo();
+            //     }
+            // }, 100); 
         } catch (e) {
             console.error("재생 엔진 오류:", e);
         }
