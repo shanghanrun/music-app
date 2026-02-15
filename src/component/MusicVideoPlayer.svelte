@@ -2,47 +2,41 @@
     import { onMount, onDestroy } from 'svelte';
     import { musicUI } from "../store/musicUI.svelte";
 
-    /* =========================
-       외부 객체 (반응성 ❌)
-    ========================= */
     let player = null;
-    let playerContainer = null;
-    let playerReady = false;
-    let apiReady = false;
+    let playerContainer = $state(null); // 반응성 추가
+    let playerReady = $state(false);
+    let apiReady = $state(false);
 
-    const DEFAULT_URL =
-        'https://www.youtube.com/watch?v=3w5iMGSHvsE';
+    const DEFAULT_URL = 'https://www.youtube.com/watch?v=3w5iMGSHvsE';
 
     /* =========================
-       YouTube API 로딩
+       YouTube API 로딩 (더 견고하게)
     ========================= */
     onMount(() => {
-        if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            document.body.appendChild(tag);
-        }
-
-        window.onYouTubeIframeAPIReady = () => {
+        // 이미 API가 로드되어 있다면 바로 준비 완료
+        if (window.YT && window.YT.Player) {
             apiReady = true;
-            tryInitPlayer();
-        };
+        } else {
+            if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                document.body.appendChild(tag);
+            }
+            window.onYouTubeIframeAPIReady = () => {
+                apiReady = true;
+            };
+        }
     });
 
     onDestroy(() => {
-        if (player && typeof player.destroy === 'function') {
-            player.destroy();
-            player = null;
-        }
+        if (player?.destroy) player.destroy();
     });
 
     /* =========================
-       Player 생성
+       Player 생성 및 감시
     ========================= */
     function tryInitPlayer() {
-        if (!apiReady) return;
-        if (!playerContainer) return;
-        if (player) return; // 중복 생성 방지
+        if (!apiReady || !playerContainer || player) return;
 
         const src = musicUI.currentMusic?.src ?? DEFAULT_URL;
         const videoId = extractVideoId(src);
@@ -56,32 +50,30 @@
                 mute: 1,
                 controls: 1,
                 playsinline: 1,
-                origin: window.location.origin
+                // origin 설정은 배포 환경에서 필수
+                origin: window.location.origin 
             },
             events: {
-                onReady: () => {
-                    playerReady = true;
-                },
-                onStateChange: onPlayerStateChange
+                onReady: () => { playerReady = true; },
+                onStateChange: (e) => { if (e.data === 0) musicUI.playNext(); }
             }
         });
     }
 
-    /* =========================
-       상태 변화 감지
-    ========================= */
+    // API나 컨테이너가 준비되면 즉시 실행
     $effect(() => {
-        // DOM, API, 데이터 순서 무관하게 대응
-        tryInitPlayer();
+        if (apiReady && playerContainer) {
+            tryInitPlayer();
+        }
     });
 
+    // 곡이 바뀌면 대응
     $effect(() => {
-        if (!playerReady) return;
-        if (!musicUI.currentMusic) return;
-
+        if (!playerReady || !musicUI.currentMusic) return;
+        
         const videoId = extractVideoId(musicUI.currentMusic.src);
-
         try {
+            // cue만 할지 로드할지 결정
             if (musicUI.isPlaying) {
                 player.loadVideoById(videoId);
             } else {
@@ -92,36 +84,19 @@
         }
     });
 
-    /* =========================
-       플레이어 이벤트
-    ========================= */
-    function onPlayerStateChange(event) {
-        // 0 = 종료
-        if (event.data === 0) {
-            musicUI.playNext();
-        }
-    }
-
-    /* =========================
-       Utils
-    ========================= */
     function extractVideoId(url) {
         if (!url) return '';
-        if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
-        if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
-        return url;
+        const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([^& \n]+)/);
+        return match ? match[1] : url;
     }
 </script>
 
-<!-- =========================
-     UI
-========================= -->
 <div class="video-container">
-    {#if musicUI.currentMusic}
-        <div class="iframe-wrapper">
-            <div class="player" bind:this={playerContainer}></div>
-        </div>
-    {:else}
+    <div class="iframe-wrapper" class:hidden={!musicUI.currentMusic}>
+        <div class="player" bind:this={playerContainer}></div>
+    </div>
+    
+    {#if !musicUI.currentMusic}
         <div class="placeholder">
             재생할 곡을 선택해주세요.
         </div>
