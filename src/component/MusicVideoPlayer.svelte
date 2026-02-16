@@ -47,7 +47,7 @@
             videoId,
             playerVars: {
                 autoplay: 0,
-                mute: 1,
+                mute: 0,
                 controls: 1,
                 playsinline: 1,
                 // origin 설정은 배포 환경에서 필수
